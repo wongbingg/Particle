@@ -24,7 +24,7 @@ final class PhotoPickerViewController: UIViewController,
                                        PhotoPickerViewControllable {
     
     private enum Constant {
-        static let fetchingAmount = 100
+        static let fetchingAmount = 20
     }
     
     private enum Metric {
@@ -226,17 +226,18 @@ final class PhotoPickerViewController: UIViewController,
     }
     
     private func fetchMorePhotos() {
-        if let photoCount = listener?.fetchAllPhotosCount(),
-           (photoCount / Constant.fetchingAmount) <= page {
-            if photoCount % Constant.fetchingAmount == 0 {
-                return
-            } else {
-                self.indexDataSource.accept(Array(0...(photoCount-1)))
-            }
-        } else {
-            self.indexDataSource.accept(Array(0...(Constant.fetchingAmount*page)))
-            self.page += 1
+        
+        guard let allPhotoCount = listener?.fetchAllPhotosCount() else { return }
+        
+        if page * Constant.fetchingAmount >= allPhotoCount {
+            // 이미 마지막 페이지
+            return
         }
+        var currentData = indexDataSource.value
+        let newData = Array(currentData.count...currentData.count + Constant.fetchingAmount)
+        currentData.append(contentsOf: newData)
+        self.indexDataSource.accept(currentData)
+        self.page += 1
     }
 }
 
@@ -280,3 +281,17 @@ private extension PhotoPickerViewController {
         }
     }
 }
+
+// MARK: - Preview
+
+#if canImport(SwiftUI) && DEBUG
+import SwiftUI
+
+@available(iOS 13.0, *)
+struct PhotoPickerViewController_Preview: PreviewProvider {
+    
+    static var previews: some View {
+        PhotoPickerViewController().showPreview()
+    }
+}
+#endif
