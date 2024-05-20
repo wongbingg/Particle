@@ -45,3 +45,8 @@ xcuserdata/
 .DS_Store
 Particle/Pods
 Particle/fastlane
+*.xcconfig
+Particle/Particle/Resources/GoogleService-Info.plist
+Particle/certificates
+Particle/Particle/ParticleRelease.entitlements
+Particle/Particle.xcworkspace
