@@ -34,7 +34,7 @@ final class PhotoPickerViewController: UIViewController,
             static let nextButtonRightMargin = 20
         }
         enum CollectionViewCell {
-            static let width = (DeviceSize.width-4)/3
+            static let width = (DeviceSize.width-4)/4
         }
     }
     
@@ -43,6 +43,7 @@ final class PhotoPickerViewController: UIViewController,
     private var selectedIndexPaths: BehaviorRelay<[Int]> = .init(value: [])
     private var indexDataSource: BehaviorRelay<[Int]> = .init(value: [])
     private var page: Int = 1
+    private var isPresentCategoryList = false
     
     // MARK: - UIComponents
     
@@ -58,12 +59,12 @@ final class PhotoPickerViewController: UIViewController,
         return button
     }()
     
-    private let navigationTitle: UILabel = {
-        let label = UILabel()
-        label.text = "최근항목"
-        label.font = .systemFont(ofSize: 19)
-        label.textColor = .white
-        return label
+    private let navigationTitle: UIButton = {
+        let button = UIButton()
+        button.setTitle("최근 항목 ⏷", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 19)
+        return button
     }()
     
     private let nextButton: UIButton = {
@@ -87,6 +88,11 @@ final class PhotoPickerViewController: UIViewController,
         collectionView.register(PhotoCell.self)
         collectionView.backgroundColor = .particleColor.black
         return collectionView
+    }()
+    
+    private let photoCategoryListView: PhotoCategoryListView = {
+        let listView = PhotoCategoryListView(frame: .zero, style: .plain)
+        return listView
     }()
     
     // MARK: - Initializers
@@ -119,9 +125,20 @@ final class PhotoPickerViewController: UIViewController,
     }
     
     private func bind() {
+        bindPhotoCategoryListView()
         bindCollectionViewCell()
         bindItemSelected()
         bindButtonAction()
+    }
+    
+    private func bindPhotoCategoryListView() {
+        photoCategoryListView.selected
+            .skip(1)
+            .bind { [weak self] selected in
+                self?.togglePhotoCategoryListView()
+                self?.navigationTitle.setTitle(selected + " ⏷", for: .normal)
+            }
+            .disposed(by: disposeBag)
     }
     
     private func bindCollectionViewCell() {
@@ -206,12 +223,38 @@ final class PhotoPickerViewController: UIViewController,
             }
             .disposed(by: disposeBag)
         
+        navigationTitle.rx.tap
+            .bind { [weak self] in
+                print("최근항목 탭!")
+                self?.togglePhotoCategoryListView()
+            }
+            .disposed(by: disposeBag)
+        
         nextButton.rx.tap
             .bind { [weak self] in
                 guard let self = self else { return }
                 self.listener?.nextButtonTapped(with: selectedIndexPaths.value)
             }
             .disposed(by: disposeBag)
+    }
+    
+    private func togglePhotoCategoryListView() {
+        isPresentCategoryList.toggle()
+        
+        if isPresentCategoryList {
+            photoCategoryListView.snp.remakeConstraints {
+                $0.top.equalTo(navigationBar.snp.bottom)
+                $0.bottom.leading.trailing.equalTo(view.safeAreaLayoutGuide)
+            }
+        } else {
+            photoCategoryListView.snp.remakeConstraints {
+                $0.top.equalTo(view.snp.bottom)
+                $0.bottom.leading.trailing.equalTo(view.safeAreaLayoutGuide)
+            }
+        }
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
     }
     
     private func getCell(at indexPath: IndexPath?) -> PhotoCell? {
@@ -245,7 +288,7 @@ final class PhotoPickerViewController: UIViewController,
 
 private extension PhotoPickerViewController {
     func addSubviews() {
-        [navigationBar, photoCollectionView].forEach {
+        [navigationBar, photoCollectionView, photoCategoryListView].forEach {
             view.addSubview($0)
         }
         
@@ -278,6 +321,12 @@ private extension PhotoPickerViewController {
         photoCollectionView.snp.makeConstraints {
             $0.top.equalTo(navigationBar.snp.bottom)
             $0.bottom.leading.trailing.equalTo(view.safeAreaLayoutGuide)
+        }
+        
+        photoCategoryListView.snp.makeConstraints {
+            $0.top.equalTo(view.snp.bottom)
+            $0.bottom.leading.trailing.equalTo(view.safeAreaLayoutGuide)
+            $0.height.equalTo(0)
         }
     }
 }
