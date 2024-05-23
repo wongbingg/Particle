@@ -199,7 +199,7 @@ final class HomeViewController: UIViewController, HomePresentable, HomeViewContr
             .disposed(by: disposeBag)
         
         recordList
-            .observe(on: MainScheduler.instance)
+            .observeOn(MainScheduler.instance)
             .subscribe { [weak self] element in
             if element.isEmpty {
                 self?.emptyLabel.isHidden = false

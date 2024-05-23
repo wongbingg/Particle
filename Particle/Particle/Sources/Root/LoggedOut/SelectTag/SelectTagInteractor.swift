@@ -55,7 +55,7 @@ final class SelectTagInteractor: PresentableInteractor<SelectTagPresentable>,
     func startButtonTapped(with selectedTags: [String]) {
 
         setInterestedTagsUseCase.execute(tags: selectedTags)
-            .observe(on: MainScheduler.instance)
+            .observeOn(MainScheduler.instance)
             .subscribe { [weak self] isComplete in
                 if isComplete {
                     self?.listener?.selectTagSuccess()

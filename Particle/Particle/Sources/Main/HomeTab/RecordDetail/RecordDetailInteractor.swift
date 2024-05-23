@@ -71,7 +71,7 @@ final class RecordDetailInteractor: PresentableInteractor<RecordDetailPresentabl
     
     func recordDetailDeleteButtonTapped(with id: String) {
         deleteRecordUseCase.execute(id: id)
-            .observe(on: MainScheduler.instance)
+            .observeOn(MainScheduler.instance)
             .subscribe { [weak self] deletedRecordId in
                 if id == deletedRecordId {
                     self?.presenter.showSuccessAlert()

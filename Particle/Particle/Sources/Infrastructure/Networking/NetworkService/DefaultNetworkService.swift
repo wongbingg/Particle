@@ -61,7 +61,7 @@ public final class DefaultNetworkService: NetworkService {
                 let data = try self.handleResponse(data: pair.data, response: pair.response)
                 return data
             }
-            .catch { error in
+            .catchError { error in
                 let mappedError = self.resolve(error: error)
                 return .error(mappedError)
             }

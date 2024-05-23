@@ -20,7 +20,7 @@ struct DefaultSearchRepository: SearchRepository {
     func searchArticleBy(_ text: String) -> Observable<[SearchResult]> {
         return searchDataSource.getSearchResultBy(text: text)
             .map { $0.map { $0.toDomain() } }
-            .catchAndReturn([])
+            .catchErrorJustReturn([])
     }
     
     func getRecentSearchTexts() -> Observable<[String]> {

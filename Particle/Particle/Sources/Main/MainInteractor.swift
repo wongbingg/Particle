@@ -72,7 +72,7 @@ final class MainInteractor: PresentableInteractor<MainPresentable>,
         }
         
         DynamicLinkParser.shared.recordId
-            .observe(on: MainScheduler.instance)
+            .observeOn(MainScheduler.instance)
             .subscribe { [weak self] value in
                 if let recordId = value {
                     self?.showParticle(id: recordId)
@@ -87,7 +87,7 @@ final class MainInteractor: PresentableInteractor<MainPresentable>,
     
     private func showParticle(id: String) {
         fetchRecordByIdUseCase.execute(id: id)
-            .observe(on: MainScheduler.instance)
+            .observeOn(MainScheduler.instance)
             .subscribe { [weak self] model in
                 self?.router?.attachRecordDetail(data: model)
             } onError: { [weak self] error in

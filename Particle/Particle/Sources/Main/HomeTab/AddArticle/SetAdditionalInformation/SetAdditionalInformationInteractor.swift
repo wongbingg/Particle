@@ -84,7 +84,7 @@ final class SetAdditionalInformationInteractor: PresentableInteractor<SetAdditio
         
         if let recordData = recordData { // 수정모드
             editRecordUseCase.execute(id: recordData.id, updatedModel: model)
-                .observe(on: MainScheduler.instance)
+                .observeOn(MainScheduler.instance)
                 .subscribe { [weak self] result in
                     self?.listener?.setAdditionalInfoSuccessEdit(data: result)
                 } onError: { error in
@@ -95,7 +95,7 @@ final class SetAdditionalInformationInteractor: PresentableInteractor<SetAdditio
         } else {
             
             createRecordUseCase.execute(model: model)
-                .observe(on: MainScheduler.instance)
+                .observeOn(MainScheduler.instance)
                 .subscribe { [weak self]  result in
                     self?.listener?.setAdditionalInfoSuccessPost(data: result)
                 } onError: { error in

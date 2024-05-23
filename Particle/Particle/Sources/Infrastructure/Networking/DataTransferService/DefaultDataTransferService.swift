@@ -48,7 +48,7 @@ extension DefaultDataTransferService: DataTransferService {
                 let result: T = try self.decode(data: data, decoder: endpoint.responseDecoder)
                 return result
             }
-            .catch { error in
+            .catchError { error in
                 self.errorLogger.log(error: error)
 
                 if let networkError = error as? NetworkError {
@@ -64,7 +64,7 @@ extension DefaultDataTransferService: DataTransferService {
     
     public func request<E>(with endpoint: E) -> Observable<Data> where E : ResponseRequestable, E.Response == Data {
         return networkService.request(endpoint: endpoint)
-            .catch { error in
+            .catchError { error in
                 self.errorLogger.log(error: error)
 
                 if let networkError = error as? NetworkError {

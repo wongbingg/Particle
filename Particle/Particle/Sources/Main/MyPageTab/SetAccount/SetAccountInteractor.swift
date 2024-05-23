@@ -60,7 +60,7 @@ final class SetAccountInteractor: PresentableInteractor<SetAccountPresentable>, 
     func deleteAccountButtonTapped() {
 
         withdrawUseCase.execute()
-            .observe(on: MainScheduler.instance)
+            .observeOn(MainScheduler.instance)
             .subscribe { [weak self] data in
 
                 if (200..<300).contains(data.status) {

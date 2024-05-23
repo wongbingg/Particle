@@ -253,7 +253,7 @@ final class SelectTagViewController: UIViewController,
         }
         
         selectedTags
-            .observe(on: MainScheduler.instance)
+            .observeOn(MainScheduler.instance)
             .subscribe { [weak self] tags in
                 let flattenList = tags.flatMap { $0 }
 
