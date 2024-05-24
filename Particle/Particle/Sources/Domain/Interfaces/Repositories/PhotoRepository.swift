@@ -11,6 +11,7 @@ import Photos
 
 protocol PhotoRepository {
     func requestAuthorization() -> Observable<Bool>
+    func fetchAlbumList() -> [String]
     func fetchRecentPhotos() -> Observable<[PHAsset]>
     func fetchFavoritePhotos() -> [PHAsset]
     func fetchPhotosBy(keyword: String) -> Observable<[PHAsset]>

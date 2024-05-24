@@ -1,5 +1,5 @@
 //
-//  FetchFavoriteAlbum.swift
+//  FetchFavoriteAlbumUseCase.swift
 //  Particle
 //
 //  Created by 이원빈 on 5/24/24.
@@ -8,11 +8,11 @@
 import RxSwift
 import Photos
 
-protocol FetchFavoriteAlbum {
+protocol FetchFavoriteAlbumUseCase {
     func execute() -> [PHAsset]
 }
 
-final class DefaultFetchFavoriteAlbum: FetchFavoriteAlbum {
+final class DefaultFetchFavoriteAlbumUseCase: FetchFavoriteAlbumUseCase {
     private let photoRepository: PhotoRepository
     
     init(photoRepository: PhotoRepository) {

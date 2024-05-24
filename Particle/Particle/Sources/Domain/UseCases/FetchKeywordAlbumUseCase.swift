@@ -1,5 +1,5 @@
 //
-//  FetchKeywordAlbum.swift
+//  FetchKeywordAlbumUseCase.swift
 //  Particle
 //
 //  Created by 이원빈 on 5/24/24.
@@ -8,11 +8,11 @@
 import RxSwift
 import Photos
 
-protocol FetchKeywordAlbum {
+protocol FetchKeywordAlbumUseCase {
     func execute(keyword: String) -> Observable<[PHAsset]>
 }
 
-final class DefaultFetchKeywordAlbum: FetchKeywordAlbum {
+final class DefaultFetchKeywordAlbumUseCase: FetchKeywordAlbumUseCase {
     private let photoRepository: PhotoRepository
     
     init(photoRepository: PhotoRepository) {

@@ -30,14 +30,29 @@ struct DefaultPhotoRepository: PhotoRepository {
         }
     }
     
+    func fetchAlbumList() -> [String] {
+        var albumTitles: [String] = ["최근 항목", "즐겨찾는 항목"]
+
+        let userAlbums = PHAssetCollection.fetchAssetCollections(
+            with: .album,
+            subtype: .albumRegular,
+            options: nil)
+
+        userAlbums.enumerateObjects { collection, index, stop in
+            if let title = collection.localizedTitle {
+                albumTitles.append(title)
+            }
+        }
+        return albumTitles
+    }
+    
     func fetchRecentPhotos() -> Observable<[PHAsset]> {
         return Observable.create { emitter in
             let fetchOptions = PHFetchOptions()
-            fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
             
             let recentItems = PHAssetCollection.fetchAssetCollections(
-                with: .album,
-                subtype: .albumRegular,
+                with: .smartAlbum,
+                subtype: .smartAlbumRecentlyAdded,
                 options: fetchOptions)
             
             recentItems.enumerateObjects { (collection, index, stop) in
