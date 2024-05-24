@@ -14,5 +14,6 @@ protocol PhotoRepository {
     func fetchAlbumList() -> [String]
     func fetchRecentPhotos() -> Observable<[PHAsset]>
     func fetchFavoritePhotos() -> [PHAsset]
+    func fetchScreenShotPhotos() -> [PHAsset]
     func fetchPhotosBy(keyword: String) -> Observable<[PHAsset]>
 }

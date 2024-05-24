@@ -27,6 +27,10 @@ final class PhotoCategoryListView: UITableView {
         self.delegate = self
         self.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
     }
+    
+    func setData(_ data: [String]) {
+        self.data = data
+    }
 }
 
 extension PhotoCategoryListView: UITableViewDataSource, UITableViewDelegate {

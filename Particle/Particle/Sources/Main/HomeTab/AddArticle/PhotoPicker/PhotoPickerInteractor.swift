@@ -15,7 +15,9 @@ protocol PhotoPickerRouting: ViewableRouting {
 
 protocol PhotoPickerPresentable: Presentable {
     var listener: PhotoPickerPresentableListener? { get set }
-    // TODO: Declare methods the interactor can invoke the presenter to present data.
+    
+    func setDataSource(data: [PHAsset])
+    func setAlbumCategories(categories: [String])
 }
 
 protocol PhotoPickerListener: AnyObject {
@@ -31,30 +33,55 @@ final class PhotoPickerInteractor: PresentableInteractor<PhotoPickerPresentable>
     weak var router: PhotoPickerRouting?
     weak var listener: PhotoPickerListener?
     
-    private(set) var allPhotos: PHFetchResult<PHAsset>? = nil // 앨범에서 사진을 가져오는 Repository 따로 구현 필요 ,
-    private(set) var photoCount = Int()
+    private let requestAlbumAccessUseCase: RequestAlbumAccessUseCase
+    private let fetchAlbumListUseCase: FetchAlbumListUseCase
+    private let fetchRecentAlbumUseCase: FetchRecentAlbumUseCase
+    private let fetchFavoriteAlbumUseCase: FetchFavoriteAlbumUseCase
+    private let fetchScreenshotAlbumUseCase: FetchScreenshotAlbumUseCase
+    private let fetchKeywordAlbumUseCase: FetchKeywordAlbumUseCase
+    private var disposeBag = DisposeBag()
     
-    // TODO: Add additional dependencies to constructor. Do not perform any logic
-    // in constructor.
-    override init(presenter: PhotoPickerPresentable) {
+    init(
+        presenter: PhotoPickerPresentable,
+        requestAlbumAccessUseCase: RequestAlbumAccessUseCase,
+        fetchAlbumListUseCase: FetchAlbumListUseCase,
+        fetchRecentAlbumUseCase: FetchRecentAlbumUseCase,
+        fetchFavoriteAlbumUseCase: FetchFavoriteAlbumUseCase,
+        fetchScreenshotAlbumUseCase: FetchScreenshotAlbumUseCase,
+        fetchKeywordAlbumUseCase: FetchKeywordAlbumUseCase
+    ) {
+        self.requestAlbumAccessUseCase = requestAlbumAccessUseCase
+        self.fetchAlbumListUseCase = fetchAlbumListUseCase
+        self.fetchRecentAlbumUseCase = fetchRecentAlbumUseCase
+        self.fetchFavoriteAlbumUseCase = fetchFavoriteAlbumUseCase
+        self.fetchScreenshotAlbumUseCase = fetchScreenshotAlbumUseCase
+        self.fetchKeywordAlbumUseCase = fetchKeywordAlbumUseCase
         super.init(presenter: presenter)
         presenter.listener = self
     }
     
     override func didBecomeActive() {
         super.didBecomeActive()
-        
-        // TODO: allPhotos 불러오기
-        let fetchOptions = PHFetchOptions()
-        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false, selector: nil)]
-
-        self.allPhotos = PHAsset.fetchAssets(with: .image, options: fetchOptions)
-        photoCount = self.allPhotos?.count ?? 0
+        setup()
     }
     
     override func willResignActive() {
         super.willResignActive()
         // TODO: Pause any business logic.
+    }
+    
+    func setup() {
+        let categories = fetchAlbumListUseCase.execute()
+        presenter.setAlbumCategories(categories: categories)
+        requestAlbumAccessUseCase.execute()
+            .observeOn(MainScheduler.instance)
+            .subscribe { [weak self] isAllowed in
+                isAllowed ? self?.switchCategory(to: "최근 항목") : Console.debug("앨범 접근권한 필요")
+            } onError: { error in
+                Console.error(error.localizedDescription)
+            }
+            .disposed(by: disposeBag)
+
     }
     
     // MARK: - PhotoPickerListener
@@ -63,28 +90,36 @@ final class PhotoPickerInteractor: PresentableInteractor<PhotoPickerPresentable>
         listener?.cancelButtonTapped()
     }
     
-    func nextButtonTapped(with indexes: [Int]) {
-        listener?.nextButtonTapped(with: getSelectedPhotos(from: indexes))
+    func nextButtonTapped(with assets: [PHAsset]) {
+        listener?.nextButtonTapped(with: assets)
     }
     
-    private func getSelectedPhotos(from indexes: [Int]) -> [PHAsset] {
-        guard let allPhotos = allPhotos else {
-            Console.error("\(#function) allPhotos 값이 존재하지 않습니다.")
-            return []
+    func switchCategory(to category: String) {
+        switch category {
+        case "최근 항목":
+            fetchRecentAlbumUseCase.execute()
+                .observeOn(MainScheduler.instance)
+                .subscribe { [weak self] result in
+                    self?.presenter.setDataSource(data: result)
+                } onError: { error in
+                    Console.error(error.localizedDescription)
+                }
+                .disposed(by: disposeBag)
+        case "즐겨찾는 항목":
+            let result = fetchFavoriteAlbumUseCase.execute()
+            self.presenter.setDataSource(data: result)
+        case "스크린샷":
+            let result = fetchScreenshotAlbumUseCase.execute()
+            self.presenter.setDataSource(data: result)
+        default:
+            fetchKeywordAlbumUseCase.execute(keyword: category)
+                .observeOn(MainScheduler.instance)
+                .subscribe { [weak self] result in
+                    self?.presenter.setDataSource(data: result)
+                } onError: { error in
+                    Console.error(error.localizedDescription)
+                }
+                .disposed(by: disposeBag)
         }
-        let selectedPhotos = indexes.map {
-            allPhotos.object(at: $0)
-        }
-        
-        return selectedPhotos
     }
-    
-    func fetchAllPhotos() -> PHFetchResult<PHAsset> {
-        return allPhotos ?? .init()
-    }
-    
-    func fetchAllPhotosCount() -> Int {
-        return photoCount
-    }
-    
 }

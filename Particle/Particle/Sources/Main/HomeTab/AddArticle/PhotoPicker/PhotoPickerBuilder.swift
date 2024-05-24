@@ -8,13 +8,38 @@
 import RIBs
 
 protocol PhotoPickerDependency: Dependency {
-    // TODO: Declare the set of dependencies required by this RIB, but cannot be
-    // created by this RIB.
+    var photoRepository: PhotoRepository { get }
 }
 
 final class PhotoPickerComponent: Component<PhotoPickerDependency> {
-
-    // TODO: Declare 'fileprivate' dependencies that are only used by this RIB.
+    let requestAlbumAccessUseCase: RequestAlbumAccessUseCase
+    let fetchAlbumListUseCase: FetchAlbumListUseCase
+    let fetchRecentAlbumUseCase: FetchRecentAlbumUseCase
+    let fetchFavoriteAlbumUseCase: FetchFavoriteAlbumUseCase
+    let fetchKeywordAlbumUseCase: FetchKeywordAlbumUseCase
+    let fetchScreenshotAlbumUseCase: FetchScreenshotAlbumUseCase
+    
+    override init(dependency: PhotoPickerDependency) {
+        self.requestAlbumAccessUseCase = DefaultRequestAlbumAccessUseCase(
+            photoRepository: dependency.photoRepository
+        )
+        self.fetchAlbumListUseCase = DefaultFetchAlbumListUseCase(
+            photoRepository: dependency.photoRepository
+        )
+        self.fetchRecentAlbumUseCase = DefaultFetchRecentAlbumUseCase(
+            photoRepository: dependency.photoRepository
+        )
+        self.fetchFavoriteAlbumUseCase = DefaultFetchFavoriteAlbumUseCase(
+            photoRepository: dependency.photoRepository
+        )
+        self.fetchKeywordAlbumUseCase = DefaultFetchKeywordAlbumUseCase(
+            photoRepository: dependency.photoRepository
+        )
+        self.fetchScreenshotAlbumUseCase = DefaultFetchScreenshotAlbumUseCase(
+            photoRepository: dependency.photoRepository
+        )
+        super.init(dependency: dependency)
+    }
 }
 
 // MARK: - Builder
@@ -30,9 +55,16 @@ final class PhotoPickerBuilder: Builder<PhotoPickerDependency>, PhotoPickerBuild
     }
 
     func build(withListener listener: PhotoPickerListener) -> PhotoPickerRouting {
-        let _ = PhotoPickerComponent(dependency: dependency)
+        let component = PhotoPickerComponent(dependency: dependency)
         let viewController = PhotoPickerViewController()
-        let interactor = PhotoPickerInteractor(presenter: viewController)
+        let interactor = PhotoPickerInteractor(
+            presenter: viewController,
+            requestAlbumAccessUseCase: component.requestAlbumAccessUseCase,
+            fetchAlbumListUseCase: component.fetchAlbumListUseCase,
+            fetchRecentAlbumUseCase: component.fetchRecentAlbumUseCase,
+            fetchFavoriteAlbumUseCase: component.fetchFavoriteAlbumUseCase,
+            fetchScreenshotAlbumUseCase: component.fetchScreenshotAlbumUseCase,
+            fetchKeywordAlbumUseCase: component.fetchKeywordAlbumUseCase)
         interactor.listener = listener
         return PhotoPickerRouter(interactor: interactor, viewController: viewController)
     }

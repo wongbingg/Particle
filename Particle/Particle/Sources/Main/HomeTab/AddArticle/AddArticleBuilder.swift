@@ -13,7 +13,8 @@ protocol AddArticleDependency: Dependency {
 }
 
 final class AddArticleComponent: Component<AddArticleDependency> {
-    var repository = OrganizingSentenceRepositoryImp()
+    var defaultOrganizingSentenceRepository = OrganizingSentenceRepositoryImp()
+    var defaultPhotoRepository = DefaultPhotoRepository()
     
     fileprivate var addArticleViewController: ViewControllable {
         return dependency.addArticleViewController
@@ -66,8 +67,11 @@ extension AddArticleComponent: PhotoPickerDependency,
                                OrganizingSentenceDependency,
                                SetAdditionalInformationDependency,
                                RecordDetailDependency {
-    
+    var photoRepository: PhotoRepository {
+        return defaultPhotoRepository
+    }
+
     var organizingSentenceRepository: OrganizingSentenceRepository {
-        return repository
+        return defaultOrganizingSentenceRepository
     }
 }

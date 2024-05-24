@@ -31,7 +31,7 @@ struct DefaultPhotoRepository: PhotoRepository {
     }
     
     func fetchAlbumList() -> [String] {
-        var albumTitles: [String] = ["최근 항목", "즐겨찾는 항목"]
+        var albumTitles: [String] = ["최근 항목", "즐겨찾는 항목", "스크린샷"]
 
         let userAlbums = PHAssetCollection.fetchAssetCollections(
             with: .album,
@@ -49,22 +49,31 @@ struct DefaultPhotoRepository: PhotoRepository {
     func fetchRecentPhotos() -> Observable<[PHAsset]> {
         return Observable.create { emitter in
             let fetchOptions = PHFetchOptions()
-            
-            let recentItems = PHAssetCollection.fetchAssetCollections(
-                with: .smartAlbum,
-                subtype: .smartAlbumRecentlyAdded,
-                options: fetchOptions)
-            
-            recentItems.enumerateObjects { (collection, index, stop) in
-                let assets = PHAsset.fetchAssets(in: collection, options: nil)
-                var targetList = [PHAsset]()
-                assets.enumerateObjects { asset, index, stop in
-                    targetList.append(asset)
-                }
-                emitter.onNext(targetList)
+            fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false, selector: nil)]
+            let items = PHAsset.fetchAssets(with: .image, options: fetchOptions)
+            var targetList = [PHAsset]()
+            items.enumerateObjects { asset, index, stop in
+                targetList.append(asset)
             }
+            emitter.onNext(targetList)
             return Disposables.create()
         }
+    }
+    
+    func fetchScreenShotPhotos() -> [PHAsset] {
+        let screenshotAlbums = PHAssetCollection.fetchAssetCollections(
+            with: .smartAlbum,
+            subtype: .smartAlbumScreenshots,
+            options: nil)
+        guard let screenshotAlbum = screenshotAlbums.firstObject else { return [] }
+        let fetchOptions = PHFetchOptions()
+        let screenshotAssets = PHAsset.fetchAssets(in: screenshotAlbum, options: fetchOptions)
+        
+        var assets: [PHAsset] = []
+        screenshotAssets.enumerateObjects { asset, _, _ in
+            assets.append(asset)
+        }
+        return assets
     }
     
     func fetchFavoritePhotos() -> [PHAsset] {
