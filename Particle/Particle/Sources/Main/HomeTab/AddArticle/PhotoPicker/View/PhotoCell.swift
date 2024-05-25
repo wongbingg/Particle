@@ -10,25 +10,6 @@ import UIKit
 import RxSwift
 import Photos
 
-class CacheManager {
-    static let shared = CacheManager()
-    private let imageCache = NSCache<NSString, UIImage>()
-    private let totalCostLimit = 1024*1024*400
-
-    private init() {
-        imageCache.totalCostLimit = totalCostLimit
-    }
-
-    func cacheImage(_ image: UIImage, forKey key: String) {
-//        imageCache.setObject(image, forKey: key as NSString)
-        imageCache.setObject(image, forKey: key as NSString, cost: totalCostLimit)
-    }
-
-    func image(forKey key: String) -> UIImage? {
-        return imageCache.object(forKey: key as NSString)
-    }
-}
-
 final class PhotoCell: UICollectionViewCell {
     
     private var disposeBag = DisposeBag()
@@ -97,20 +78,17 @@ final class PhotoCell: UICollectionViewCell {
         disposeBag = DisposeBag()
     }
     
-    func setImage(with asset: PHAsset) {
+    func setImage(with asset: PHAsset, manager: PHCachingImageManager) {
 
-        if let cachedImage = CacheManager.shared.image(forKey: asset.localIdentifier) {
-            self.imageView.image = cachedImage
-        } else {
-            fetchImage(
-                asset: asset,
-                contentMode: .default,
-                targetSize: imageView.frame.size
-            ).subscribe { [ weak self] image in
-                self?.imageView.image = image
-            }
-            .disposed(by: disposeBag)
+        fetchImage(
+            asset: asset,
+            contentMode: .default,
+            targetSize: imageView.frame.size,
+            manager: manager
+        ).subscribe { [ weak self] image in
+            self?.imageView.image = image
         }
+        .disposed(by: disposeBag)
     }
     
     func check(number: Int) {
@@ -128,29 +106,32 @@ final class PhotoCell: UICollectionViewCell {
     
     private func fetchImage(asset: PHAsset,
                             contentMode: PHImageContentMode,
-                            targetSize: CGSize) -> Observable<UIImage> {
+                            targetSize: CGSize,
+                            manager: PHCachingImageManager) -> Observable<UIImage> {
         let options = PHImageRequestOptions()
+        options.resizeMode = .fast
         options.version = .original
-        options.deliveryMode = .opportunistic
+        options.deliveryMode = .fastFormat
         options.isNetworkAccessAllowed = true
         
         return Observable.create { emitter in
-        
-            PHCachingImageManager().requestImage(
+            
+            let task = manager.requestImage(
                 for: asset,
                 targetSize: targetSize,
                 contentMode: contentMode,
                 options: options) { image, info in
                     
                     if let image = image {
-                        CacheManager.shared.cacheImage(image, forKey: asset.localIdentifier)
                         emitter.onNext(image)
                     } else {
-                        Console.error("\(#function) image 가 존재하지 않습니다.")
+                        Console.error("\(#function) image 가 존재하지 않습니다.\(info)")
                     }
                 }
             
-            return Disposables.create()
+            return Disposables.create {
+                manager.cancelImageRequest(task)
+            }
         }
     }
 }
