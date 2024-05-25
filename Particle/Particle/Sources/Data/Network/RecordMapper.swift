@@ -19,10 +19,14 @@ struct RecordMapper: RecordMapperProtocol {
             return []
         }
         guard model.isEmpty == false else { return [] }
-        var sectionList: [SectionOfRecordTag] = [.init(header: "My", items: model)]
+        var sortedModel = model
+        sortedModel.sort { a, b in
+            a.fetchDate().timeIntervalSince1970 > b.fetchDate().timeIntervalSince1970
+        }
+        var sectionList: [SectionOfRecordTag] = [.init(header: "My", items: sortedModel)]
         let tags = userInterestedTags.map { $0.replacingOccurrences(of: "#", with: "")}
         for tag in tags {
-            let filteredList = model.filter { $0.tags.contains(tag) }
+            let filteredList = sortedModel.filter { $0.tags.contains(tag) }
             if filteredList.isEmpty == false {
                 sectionList.append(.init(header: tag, items: filteredList))
             }
