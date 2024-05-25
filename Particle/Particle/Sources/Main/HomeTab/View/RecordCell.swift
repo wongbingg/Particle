@@ -291,7 +291,7 @@ private extension RecordCell {
         cardStyleBackgroundView.snp.makeConstraints {
             $0.top.equalTo(dateLabel.snp.bottom).offset(12)
             $0.leading.trailing.equalToSuperview()
-            $0.height.equalTo(335)
+            $0.height.equalTo(336)
         }
         
         cardStyleLabelStack.snp.makeConstraints {

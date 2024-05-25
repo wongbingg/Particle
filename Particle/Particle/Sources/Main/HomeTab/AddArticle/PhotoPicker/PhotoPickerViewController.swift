@@ -245,7 +245,9 @@ final class PhotoPickerViewController: UIViewController,
         } else {
             photoCategoryListView.snp.remakeConstraints {
                 $0.top.equalTo(view.snp.bottom)
-                $0.bottom.leading.trailing.equalTo(view.safeAreaLayoutGuide)
+                $0.bottom.equalTo(view.snp.bottom)
+                $0.leading.trailing.equalTo(view.safeAreaLayoutGuide)
+                $0.height.equalTo(0)
             }
         }
         UIView.animate(withDuration: 0.3) {
@@ -306,7 +308,8 @@ private extension PhotoPickerViewController {
         
         photoCategoryListView.snp.makeConstraints {
             $0.top.equalTo(view.snp.bottom)
-            $0.bottom.leading.trailing.equalTo(view.safeAreaLayoutGuide)
+            $0.bottom.equalTo(view.snp.bottom)
+            $0.leading.trailing.equalTo(view.safeAreaLayoutGuide)
             $0.height.equalTo(0)
         }
     }
