@@ -50,3 +50,7 @@ Particle/Particle/Resources/GoogleService-Info.plist
 Particle/certificates
 Particle/Particle/ParticleRelease.entitlements
 Particle/Particle.xcworkspace
+*.cer
+*.mobileprovision
+Particle/Particle.app.dSYM.zip
+*.ipa
