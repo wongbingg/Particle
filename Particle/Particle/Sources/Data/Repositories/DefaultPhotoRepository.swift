@@ -20,7 +20,7 @@ struct DefaultPhotoRepository: PhotoRepository {
             case .denied, .restricted, .limited:
                 emitter.onNext(false)
             case .notDetermined:
-                PHPhotoLibrary.requestAuthorization { newStatus in
+                PHPhotoLibrary.requestAuthorization(for: .readWrite) { newStatus in
                     emitter.onNext(newStatus == .authorized)
                 }
             @unknown default:
