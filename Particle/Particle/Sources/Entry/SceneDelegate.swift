@@ -16,7 +16,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     private var launchRouter: LaunchRouting?
     var window: UIWindow?
-
+    weak var systemEventHandler: SystemEventHandler?
 
     func scene(_ scene: UIScene,
                willConnectTo session: UISceneSession,
@@ -50,10 +50,26 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             }
         }
     }
+    
+    func sceneWillEnterForeground(_ scene: UIScene) {
+        // fore진입 1
+    }
+    
+    func sceneDidBecomeActive(_ scene: UIScene) {
+        // fore진입 2
+        systemEventHandler?.sceneDidBecomeActive()
+    }
 
-    func sceneDidDisconnect(_ scene: UIScene) {}
-    func sceneDidBecomeActive(_ scene: UIScene) {}
-    func sceneWillResignActive(_ scene: UIScene) {}
-    func sceneWillEnterForeground(_ scene: UIScene) {}
-    func sceneDidEnterBackground(_ scene: UIScene) {}
+    func sceneWillResignActive(_ scene: UIScene) {
+        // back진입 1
+        systemEventHandler?.sceneWillResignActive()
+    }
+    
+    func sceneDidEnterBackground(_ scene: UIScene) {
+        // back진입 2
+    }
+    
+    func sceneDidDisconnect(_ scene: UIScene) {
+        
+    }
 }

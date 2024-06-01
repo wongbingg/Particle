@@ -28,7 +28,8 @@ protocol PhotoPickerListener: AnyObject {
 
 final class PhotoPickerInteractor: PresentableInteractor<PhotoPickerPresentable>,
                                    PhotoPickerInteractable,
-                                   PhotoPickerPresentableListener {
+                                   PhotoPickerPresentableListener,
+                                   SystemEventHandler {
     
     weak var router: PhotoPickerRouting?
     weak var listener: PhotoPickerListener?
@@ -40,6 +41,7 @@ final class PhotoPickerInteractor: PresentableInteractor<PhotoPickerPresentable>
     private let fetchScreenshotAlbumUseCase: FetchScreenshotAlbumUseCase
     private let fetchKeywordAlbumUseCase: FetchKeywordAlbumUseCase
     private var disposeBag = DisposeBag()
+    private var selectedCategory = ""
     
     init(
         presenter: PhotoPickerPresentable,
@@ -95,6 +97,8 @@ final class PhotoPickerInteractor: PresentableInteractor<PhotoPickerPresentable>
     }
     
     func switchCategory(to category: String) {
+        self.selectedCategory = category
+        
         switch category {
         case "최근 항목":
             fetchRecentAlbumUseCase.execute()
@@ -121,5 +125,16 @@ final class PhotoPickerInteractor: PresentableInteractor<PhotoPickerPresentable>
                 }
                 .disposed(by: disposeBag)
         }
+    }
+    
+    // MARK: - SystemEventHandler
+    
+    func sceneDidBecomeActive() {
+        Console.log("PhotoPickerInteractor - \(#function)")
+        switchCategory(to: selectedCategory)
+    }
+    
+    func sceneWillResignActive() {
+        Console.log("PhotoPickerInteractor - \(#function)")
     }
 }

@@ -66,6 +66,9 @@ final class PhotoPickerBuilder: Builder<PhotoPickerDependency>, PhotoPickerBuild
             fetchScreenshotAlbumUseCase: component.fetchScreenshotAlbumUseCase,
             fetchKeywordAlbumUseCase: component.fetchKeywordAlbumUseCase)
         interactor.listener = listener
+        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
+            sceneDelegate.systemEventHandler = interactor
+        }
         return PhotoPickerRouter(interactor: interactor, viewController: viewController)
     }
 }
