@@ -31,6 +31,9 @@ final class PhotoPickerViewController: UIViewController,
         enum CollectionViewCell {
             static let width = (DeviceSize.width-4)/4
         }
+        enum MiniCollectionViewCell {
+            static let width = (DeviceSize.width-4)/5
+        }
     }
     
     weak var listener: PhotoPickerPresentableListener?
@@ -83,6 +86,22 @@ final class PhotoPickerViewController: UIViewController,
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.register(PhotoCell.self)
         collectionView.backgroundColor = .particleColor.black
+        return collectionView
+    }()
+    
+    private let miniSelectedPhotoCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.itemSize = CGSize(
+            width: Metric.MiniCollectionViewCell.width,
+            height: Metric.MiniCollectionViewCell.width
+        )
+        layout.minimumLineSpacing = 2
+        layout.minimumInteritemSpacing = 0
+        layout.scrollDirection = .horizontal
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.register(MiniSelectedPhotoCell.self)
+        collectionView.backgroundColor = .black
+        collectionView.showsHorizontalScrollIndicator = false
         return collectionView
     }()
     
@@ -150,6 +169,18 @@ final class PhotoPickerViewController: UIViewController,
     }
     
     private func bindCollectionViewCell() {
+        
+        selectedIndexPaths
+            .bind(to: miniSelectedPhotoCollectionView.rx.items(
+                cellIdentifier: MiniSelectedPhotoCell.defaultReuseIdentifier,
+                cellType: MiniSelectedPhotoCell.self)
+            ) { [weak self] index, item, cell in
+                
+                guard let self = self else { return }
+                let phasset = dataSource.value[item]
+                cell.setImage(with: phasset, manager: cachingImageManager)
+            }
+            .disposed(by: disposeBag)
 
         dataSource
             .bind(to: photoCollectionView.rx.items(
@@ -177,6 +208,8 @@ final class PhotoPickerViewController: UIViewController,
                     }
                     cell.check(number: i + 1)
                 }
+                let lastIndexPath = IndexPath(item: indexs.count - 1, section: 0)
+                self?.miniSelectedPhotoCollectionView.scrollToItem(at: lastIndexPath, at: .right, animated: true)
             }
             .disposed(by: disposeBag)
     }
@@ -271,7 +304,12 @@ final class PhotoPickerViewController: UIViewController,
 
 private extension PhotoPickerViewController {
     func addSubviews() {
-        [navigationBar, photoCollectionView, photoCategoryListView].forEach {
+        [
+            navigationBar,
+            photoCollectionView,
+            miniSelectedPhotoCollectionView,
+            photoCategoryListView
+        ].forEach {
             view.addSubview($0)
         }
         
@@ -303,6 +341,12 @@ private extension PhotoPickerViewController {
         
         photoCollectionView.snp.makeConstraints {
             $0.top.equalTo(navigationBar.snp.bottom)
+            $0.leading.trailing.equalTo(view.safeAreaLayoutGuide)
+            $0.bottom.equalTo(miniSelectedPhotoCollectionView.snp.top)
+        }
+        
+        miniSelectedPhotoCollectionView.snp.makeConstraints {
+            $0.top.equalTo(view.snp.bottom).offset(-150)
             $0.bottom.leading.trailing.equalTo(view.safeAreaLayoutGuide)
         }
         
