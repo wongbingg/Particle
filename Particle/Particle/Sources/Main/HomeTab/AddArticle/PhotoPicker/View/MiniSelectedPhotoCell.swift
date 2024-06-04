@@ -27,6 +27,27 @@ final class MiniSelectedPhotoCell: UICollectionViewCell {
         return imageView
     }()
     
+    private let deleteButton: UIButton = {
+        let button = UIButton()
+        button.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        button.layer.cornerRadius = 10
+        let xPath = UIBezierPath()
+        let lineWidth: CGFloat = 1.2
+        
+        xPath.move(to: CGPoint(x: 6, y: 6))
+        xPath.addLine(to: CGPoint(x: 14, y: 14))
+        xPath.move(to: CGPoint(x: 14, y: 6))
+        xPath.addLine(to: CGPoint(x: 6, y: 14))
+        
+        let xShapeLayer = CAShapeLayer()
+        xShapeLayer.path = xPath.cgPath
+        xShapeLayer.strokeColor = UIColor.white.cgColor
+        xShapeLayer.lineWidth = lineWidth
+        
+        button.layer.addSublayer(xShapeLayer)
+        return button
+    }()
+    
     // MARK: - Initializers
     
     override init(frame: CGRect) {
@@ -34,6 +55,12 @@ final class MiniSelectedPhotoCell: UICollectionViewCell {
         addSubviews()
         setConstraints()
         contentView.clipsToBounds = true
+        
+        deleteButton.rx.tap
+            .bind { _ in
+                Console.debug("delteButton Tapped!!")
+            }
+            .disposed(by: disposeBag)
     }
     
     required init?(coder: NSCoder) {
@@ -91,6 +118,26 @@ final class MiniSelectedPhotoCell: UICollectionViewCell {
             }
         }
     }
+    
+    private func addWhiteX() {
+        let xPath = UIBezierPath()
+        let lineWidth: CGFloat = 1.0
+        
+        // X의 시작점과 끝점을 계산
+        xPath.move(to: CGPoint(x: 2, y: 2))
+        xPath.addLine(to: CGPoint(x: 8, y: 8))
+        xPath.move(to: CGPoint(x: 8, y: 2))
+        xPath.addLine(to: CGPoint(x: 2, y: 8))
+        
+        // X를 그리기 위한 레이어
+        let xShapeLayer = CAShapeLayer()
+        xShapeLayer.path = xPath.cgPath
+        xShapeLayer.strokeColor = UIColor.white.cgColor
+        xShapeLayer.lineWidth = lineWidth
+        
+        // 버튼에 X 레이어 추가
+        self.layer.addSublayer(xShapeLayer)
+    }
 }
 
 // MARK: - Layout Settting
@@ -102,11 +149,18 @@ private extension MiniSelectedPhotoCell {
             .forEach {
                 contentView.addSubview($0)
             }
+        imageView.addSubview(deleteButton)
     }
     
     func setConstraints() {
         imageView.snp.makeConstraints {
             $0.top.bottom.leading.trailing.equalTo(contentView)
+        }
+        
+        deleteButton.snp.makeConstraints {
+            $0.width.height.equalTo(20)
+            $0.top.equalToSuperview().inset(2)
+            $0.trailing.equalToSuperview().inset(2)
         }
     }
 }
