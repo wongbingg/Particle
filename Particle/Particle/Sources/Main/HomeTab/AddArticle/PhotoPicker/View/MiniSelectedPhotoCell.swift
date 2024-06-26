@@ -24,6 +24,7 @@ final class MiniSelectedPhotoCell: UICollectionViewCell {
     private let imageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
+        imageView.isUserInteractionEnabled = true
         return imageView
     }()
     
@@ -55,12 +56,6 @@ final class MiniSelectedPhotoCell: UICollectionViewCell {
         addSubviews()
         setConstraints()
         contentView.clipsToBounds = true
-        
-        deleteButton.rx.tap
-            .bind { _ in
-                Console.debug("delteButton Tapped!!")
-            }
-            .disposed(by: disposeBag)
     }
     
     required init?(coder: NSCoder) {
@@ -86,6 +81,14 @@ final class MiniSelectedPhotoCell: UICollectionViewCell {
             self?.imageView.image = image
         }
         .disposed(by: disposeBag)
+    }
+    
+    func bindDeleteButton(_ action: @escaping () -> Void) {
+        deleteButton.rx.tap
+            .bind { _ in
+                action()
+            }
+            .disposed(by: disposeBag)
     }
     
     private func fetchImage(asset: PHAsset,

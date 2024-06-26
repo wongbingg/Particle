@@ -179,6 +179,9 @@ final class PhotoPickerViewController: UIViewController,
                 guard let self = self else { return }
                 let phasset = dataSource.value[item]
                 cell.setImage(with: phasset, manager: cachingImageManager)
+                cell.bindDeleteButton {
+                    Console.log("\(index) 번째 사진 제거!")
+                }
             }
             .disposed(by: disposeBag)
 
