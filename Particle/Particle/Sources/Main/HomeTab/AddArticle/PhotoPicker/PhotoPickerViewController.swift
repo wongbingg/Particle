@@ -32,17 +32,18 @@ final class PhotoPickerViewController: UIViewController,
             static let width = (DeviceSize.width-4)/4
         }
         enum MiniCollectionViewCell {
-            static let width = (DeviceSize.width-4)/5
+            static let width = (DeviceSize.width-4)/6
+            static let spacing: CGFloat = 5
         }
     }
     
     weak var listener: PhotoPickerPresentableListener?
     private var disposeBag: DisposeBag = .init()
+    private let cachingImageManager = PHCachingImageManager()
+    
     private var selectedIndexPaths: BehaviorRelay<[Int]> = .init(value: [])
     private var dataSource: BehaviorRelay<[PHAsset]> = .init(value: [])
-    private var page: Int = 1
     private var isPresentCategoryList = false
-    private let cachingImageManager = PHCachingImageManager()
     
     // MARK: - UIComponents
     
@@ -89,13 +90,13 @@ final class PhotoPickerViewController: UIViewController,
         return collectionView
     }()
     
-    private let miniSelectedPhotoCollectionView: UICollectionView = {
+    private let selectedPhotoCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.itemSize = CGSize(
             width: Metric.MiniCollectionViewCell.width,
             height: Metric.MiniCollectionViewCell.width
         )
-        layout.minimumLineSpacing = 2
+        layout.minimumLineSpacing = Metric.MiniCollectionViewCell.spacing
         layout.minimumInteritemSpacing = 0
         layout.scrollDirection = .horizontal
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -108,6 +109,13 @@ final class PhotoPickerViewController: UIViewController,
     private let photoCategoryListView: PhotoCategoryListView = {
         let listView = PhotoCategoryListView(frame: .zero, style: .plain)
         return listView
+    }()
+    
+    private let homeIndicatorBackground: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .black
+        return view
     }()
     
     // MARK: - Initializers
@@ -146,20 +154,24 @@ final class PhotoPickerViewController: UIViewController,
         navigationController?.isNavigationBarHidden = true
         addSubviews()
         setConstraints()
+        
+        setupPhotoCategoryListView()
+        setupPhotoCollectionView()
+        setupSelectedPhotoCollectionView()
     }
     
     private func bind() {
-        bindPhotoCategoryListView()
-        bindCollectionViewCell()
         bindItemSelected()
+        bindSelectedIndexPaths()
         bindButtonAction()
     }
     
-    private func bindPhotoCategoryListView() {
+    private func setupPhotoCategoryListView() {
+        
         photoCategoryListView.selected
             .skip(1)
             .bind { [weak self] selected in
-                self?.togglePhotoCategoryListView()
+                self?.showCategory()
                 self?.navigationTitle.setTitle(selected + " ⏷", for: .normal)
                 self?.listener?.switchCategory(to: selected)
                 self?.selectedIndexPaths.accept([])
@@ -168,23 +180,8 @@ final class PhotoPickerViewController: UIViewController,
             .disposed(by: disposeBag)
     }
     
-    private func bindCollectionViewCell() {
+    private func setupPhotoCollectionView() {
         
-        selectedIndexPaths
-            .bind(to: miniSelectedPhotoCollectionView.rx.items(
-                cellIdentifier: MiniSelectedPhotoCell.defaultReuseIdentifier,
-                cellType: MiniSelectedPhotoCell.self)
-            ) { [weak self] index, item, cell in
-                
-                guard let self = self else { return }
-                let phasset = dataSource.value[item]
-                cell.setImage(with: phasset, manager: cachingImageManager)
-                cell.bindDeleteButton {
-                    Console.log("\(index) 번째 사진 제거!")
-                }
-            }
-            .disposed(by: disposeBag)
-
         dataSource
             .bind(to: photoCollectionView.rx.items(
                 cellIdentifier: PhotoCell.defaultReuseIdentifier,
@@ -202,29 +199,67 @@ final class PhotoPickerViewController: UIViewController,
                 }
             }
             .disposed(by: disposeBag)
+    }
+    
+    private func setupSelectedPhotoCollectionView() {
+        
+        selectedIndexPaths
+            .bind(to: selectedPhotoCollectionView.rx.items(
+                cellIdentifier: MiniSelectedPhotoCell.defaultReuseIdentifier,
+                cellType: MiniSelectedPhotoCell.self)
+            ) { [weak self] index, item, cell in
+                
+                guard let self = self else { return }
+                let phasset = dataSource.value[item]
+                cell.setImage(with: phasset, manager: cachingImageManager)
+                
+                
+                cell.bindDeleteButton { [weak self] in
+                    guard let self = self else { return }
+                    var tmp = self.selectedIndexPaths.value
+                    tmp.remove(at: index)
+                    self.selectedIndexPaths.accept(tmp)
+                    
+                    if let photoCell = self.getPhotoCell(at: .init(row: item, section: 0)) {
+                        photoCell.uncheck()
+                    }
+                }
+            }
+            .disposed(by: disposeBag)
+    }
+    
+    private func bindSelectedIndexPaths() {
         
         selectedIndexPaths
             .bind { [weak self] indexs in
+                guard indexs.isEmpty == false else {
+                    self?.nextButton.isEnabled = false
+                    return
+                }
                 for (i, index) in indexs.enumerated() {
-                    guard let cell = self?.getCell(at: IndexPath(row: index, section: 0)) else {
+                    guard let cell = self?.getPhotoCell(at: .init(row: index, section: 0)) else {
                         return
                     }
                     cell.check(number: i + 1)
                 }
                 let lastIndexPath = IndexPath(item: indexs.count - 1, section: 0)
-                self?.miniSelectedPhotoCollectionView.scrollToItem(at: lastIndexPath, at: .right, animated: true)
+                
+                self?.selectedPhotoCollectionView.scrollToItem(
+                    at: lastIndexPath,
+                    at: .right,
+                    animated: true
+                )
             }
             .disposed(by: disposeBag)
     }
-    
+
     private func bindItemSelected() {
-        photoCollectionView
-            .rx
-            .itemSelected
+        
+        photoCollectionView.rx.itemSelected
             .subscribe { [weak self] indexPath in
                 guard let self = self,
                       let indexPath = indexPath.element,
-                      let cell = getCell(at: indexPath) else { return }
+                      let cell = getPhotoCell(at: indexPath) else { return }
                 
                 var list = self.selectedIndexPaths.value
                 if list.contains(indexPath.row) {
@@ -244,6 +279,7 @@ final class PhotoPickerViewController: UIViewController,
     }
     
     private func bindButtonAction() {
+        
         cancelButton.rx.tap
             .bind { [weak self] in
                 self?.listener?.cancelButtonTapped()
@@ -253,8 +289,7 @@ final class PhotoPickerViewController: UIViewController,
         
         navigationTitle.rx.tap
             .bind { [weak self] in
-                print("최근항목 탭!")
-                self?.togglePhotoCategoryListView()
+                self?.showCategory()
             }
             .disposed(by: disposeBag)
         
@@ -270,7 +305,7 @@ final class PhotoPickerViewController: UIViewController,
             .disposed(by: disposeBag)
     }
     
-    private func togglePhotoCategoryListView() {
+    private func showCategory() {
         isPresentCategoryList.toggle()
         
         if isPresentCategoryList {
@@ -291,7 +326,7 @@ final class PhotoPickerViewController: UIViewController,
         }
     }
     
-    private func getCell(at indexPath: IndexPath?) -> PhotoCell? {
+    private func getPhotoCell(at indexPath: IndexPath?) -> PhotoCell? {
         guard let indexPath = indexPath else {
             Console.error("\(#function) indexPath가 존재하지 않습니다.")
             return nil
@@ -306,11 +341,13 @@ final class PhotoPickerViewController: UIViewController,
 // MARK: - Layout Settting
 
 private extension PhotoPickerViewController {
+    
     func addSubviews() {
         [
             navigationBar,
             photoCollectionView,
-            miniSelectedPhotoCollectionView,
+            selectedPhotoCollectionView,
+            homeIndicatorBackground,
             photoCategoryListView
         ].forEach {
             view.addSubview($0)
@@ -345,12 +382,17 @@ private extension PhotoPickerViewController {
         photoCollectionView.snp.makeConstraints {
             $0.top.equalTo(navigationBar.snp.bottom)
             $0.leading.trailing.equalTo(view.safeAreaLayoutGuide)
-            $0.bottom.equalTo(miniSelectedPhotoCollectionView.snp.top)
+            $0.bottom.equalTo(selectedPhotoCollectionView.snp.top)
         }
         
-        miniSelectedPhotoCollectionView.snp.makeConstraints {
+        selectedPhotoCollectionView.snp.makeConstraints {
             $0.top.equalTo(view.snp.bottom).offset(-150)
             $0.bottom.leading.trailing.equalTo(view.safeAreaLayoutGuide)
+        }
+        
+        homeIndicatorBackground.snp.makeConstraints {
+            $0.top.equalTo(selectedPhotoCollectionView.snp.bottom)
+            $0.bottom.leading.trailing.equalTo(view)
         }
         
         photoCategoryListView.snp.makeConstraints {

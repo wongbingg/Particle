@@ -25,6 +25,8 @@ final class MiniSelectedPhotoCell: UICollectionViewCell {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
         imageView.isUserInteractionEnabled = true
+        imageView.layer.cornerRadius = 5
+        imageView.clipsToBounds = true
         return imageView
     }()
     
@@ -120,26 +122,6 @@ final class MiniSelectedPhotoCell: UICollectionViewCell {
                 manager.cancelImageRequest(task)
             }
         }
-    }
-    
-    private func addWhiteX() {
-        let xPath = UIBezierPath()
-        let lineWidth: CGFloat = 1.0
-        
-        // X의 시작점과 끝점을 계산
-        xPath.move(to: CGPoint(x: 2, y: 2))
-        xPath.addLine(to: CGPoint(x: 8, y: 8))
-        xPath.move(to: CGPoint(x: 8, y: 2))
-        xPath.addLine(to: CGPoint(x: 2, y: 8))
-        
-        // X를 그리기 위한 레이어
-        let xShapeLayer = CAShapeLayer()
-        xShapeLayer.path = xPath.cgPath
-        xShapeLayer.strokeColor = UIColor.white.cgColor
-        xShapeLayer.lineWidth = lineWidth
-        
-        // 버튼에 X 레이어 추가
-        self.layer.addSublayer(xShapeLayer)
     }
 }
 
