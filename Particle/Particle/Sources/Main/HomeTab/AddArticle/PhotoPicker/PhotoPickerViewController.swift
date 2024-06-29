@@ -43,7 +43,7 @@ final class PhotoPickerViewController: UIViewController,
     
     private var selectedIndexPaths: BehaviorRelay<[Int]> = .init(value: [])
     private var dataSource: BehaviorRelay<[PHAsset]> = .init(value: [])
-    private var isPresentCategoryList = false
+    private var isPresentCategoryList: BehaviorRelay<Bool> = .init(value: false)
     
     // MARK: - UIComponents
     
@@ -171,7 +171,7 @@ final class PhotoPickerViewController: UIViewController,
         photoCategoryListView.selected
             .skip(1)
             .bind { [weak self] selected in
-                self?.showCategory()
+                self?.isPresentCategoryList.accept(false)
                 self?.navigationTitle.setTitle(selected + " ⏷", for: .normal)
                 self?.listener?.switchCategory(to: selected)
                 self?.selectedIndexPaths.accept([])
@@ -289,7 +289,17 @@ final class PhotoPickerViewController: UIViewController,
         
         navigationTitle.rx.tap
             .bind { [weak self] in
-                self?.showCategory()
+                guard let self = self else { return }
+                let current = self.isPresentCategoryList.value
+                let next = !current
+                isPresentCategoryList.accept(next)
+            }
+            .disposed(by: disposeBag)
+        
+        isPresentCategoryList
+            .subscribe { [weak self] bool in
+                guard let self = self else { return }
+                bool ? showPhotoCategoryList() : hidePhotoCategoryList()
             }
             .disposed(by: disposeBag)
         
@@ -305,21 +315,22 @@ final class PhotoPickerViewController: UIViewController,
             .disposed(by: disposeBag)
     }
     
-    private func showCategory() {
-        isPresentCategoryList.toggle()
-        
-        if isPresentCategoryList {
-            photoCategoryListView.snp.remakeConstraints {
-                $0.top.equalTo(navigationBar.snp.bottom)
-                $0.bottom.leading.trailing.equalTo(view.safeAreaLayoutGuide)
-            }
-        } else {
-            photoCategoryListView.snp.remakeConstraints {
-                $0.top.equalTo(view.snp.bottom)
-                $0.bottom.equalTo(view.snp.bottom)
-                $0.leading.trailing.equalTo(view.safeAreaLayoutGuide)
-                $0.height.equalTo(0)
-            }
+    private func showPhotoCategoryList() {
+        photoCategoryListView.snp.remakeConstraints {
+            $0.top.equalTo(navigationBar.snp.bottom)
+            $0.bottom.leading.trailing.equalTo(view.safeAreaLayoutGuide)
+        }
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    private func hidePhotoCategoryList() {
+        photoCategoryListView.snp.remakeConstraints {
+            $0.top.equalTo(view.snp.bottom)
+            $0.bottom.equalTo(view.snp.bottom)
+            $0.leading.trailing.equalTo(view.safeAreaLayoutGuide)
+            $0.height.equalTo(0)
         }
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()
