@@ -36,7 +36,7 @@ final class LoggedOutViewController: UIViewController, LoggedOutPresentable, Log
         enum ButtonStack {
             static let spacing: CGFloat = 16
             static let horizontalInset: CGFloat = 20
-            static let bottomInset: CGFloat = 91
+            static let bottomInset: CGFloat = 10
         }
     }
     
@@ -312,9 +312,8 @@ private extension LoggedOutViewController {
     
     func setConstraints() {
         backgroundImage.snp.makeConstraints {
-            $0.centerX.equalToSuperview()
-            $0.top.equalTo(view.safeAreaLayoutGuide).inset(Metric.backgroundImageTopInset)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(Metric.backgroundImageBottomInset)
+            $0.horizontalEdges.equalTo(view.safeAreaLayoutGuide)
+            $0.centerY.equalToSuperview()
         }
         
         titleStackView.snp.makeConstraints {
@@ -339,7 +338,7 @@ import AuthenticationServices
 @available(iOS 13.0, *)
 struct LoggedOutViewController_Preview: PreviewProvider {
     static var previews: some View {
-        LoggedOutViewController().showPreview()
+        LoggedOutViewController().showPreview(.iPhone8Plus)
     }
 }
 #endif
