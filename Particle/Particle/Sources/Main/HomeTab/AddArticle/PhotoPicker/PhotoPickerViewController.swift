@@ -37,6 +37,11 @@ final class PhotoPickerViewController: UIViewController,
         }
     }
     
+    private enum Strings {
+        static let navigationTitle = "최근 항목 ⏷"
+        static let navigationButton = "다음"
+    }
+    
     weak var listener: PhotoPickerPresentableListener?
     private var disposeBag: DisposeBag = .init()
     private let cachingImageManager = PHCachingImageManager()
@@ -61,7 +66,7 @@ final class PhotoPickerViewController: UIViewController,
     
     private let navigationTitle: UIButton = {
         let button = UIButton()
-        button.setTitle("최근 항목 ⏷", for: .normal)
+        button.setTitle(Strings.navigationTitle, for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 19)
         return button
@@ -69,7 +74,7 @@ final class PhotoPickerViewController: UIViewController,
     
     private let nextButton: UIButton = {
         let button = UIButton()
-        button.setTitle("다음", for: .normal)
+        button.setTitle(Strings.navigationButton, for: .normal)
         button.setTitleColor(.particleColor.main30, for: .disabled)
         button.setTitleColor(.particleColor.main100, for: .normal)
         button.isEnabled = false
