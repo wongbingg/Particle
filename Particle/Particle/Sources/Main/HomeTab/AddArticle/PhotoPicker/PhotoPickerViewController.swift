@@ -302,6 +302,7 @@ final class PhotoPickerViewController: UIViewController,
             .disposed(by: disposeBag)
         
         isPresentCategoryList
+            .skip(1)
             .subscribe { [weak self] bool in
                 guard let self = self else { return }
                 bool ? showPhotoCategoryList() : hidePhotoCategoryList()
@@ -402,7 +403,8 @@ private extension PhotoPickerViewController {
         }
         
         selectedPhotoCollectionView.snp.makeConstraints {
-            $0.top.equalTo(view.snp.bottom).offset(-150)
+//            $0.top.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-150)
+            $0.height.equalTo(100)
             $0.bottom.leading.trailing.equalTo(view.safeAreaLayoutGuide)
         }
         
@@ -429,7 +431,7 @@ import SwiftUI
 struct PhotoPickerViewController_Preview: PreviewProvider {
     
     static var previews: some View {
-        PhotoPickerViewController().showPreview()
+        PhotoPickerViewController().showPreview(.iPhone8)
     }
 }
 #endif
