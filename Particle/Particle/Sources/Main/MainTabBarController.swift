@@ -42,13 +42,6 @@ final class MainTabBarController: UITabBarController, MainPresentable, MainViewC
         configureTabBar()
     }
     
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        var tabFrame = self.tabBar.frame
-        tabFrame.size.height = Metric.tabBarHeight
-        tabFrame.origin.y = self.view.frame.size.height - Metric.tabBarHeight
-        self.tabBar.frame = tabFrame
-    }
     
     private func configureTabBar() {
         tabBar.backgroundColor = .particleColor.bk03

@@ -23,6 +23,7 @@ final class SetAlarmViewController: UIViewController, SetAlarmPresentable, SetAl
     enum Metric {
         
         static let horizontalInset: CGFloat = 20
+        static let bottomInset: CGFloat = 10
         static let sectionTitleTopInset: CGFloat = 12
         static let rowStackTopInset: CGFloat = 24
         static let rowStackSpacing: CGFloat = 16
@@ -47,6 +48,26 @@ final class SetAlarmViewController: UIViewController, SetAlarmPresentable, SetAl
         let button = UIButton()
         button.setImage(.particleImage.backButton, for: .normal)
         return button
+    }()
+    
+    private let mainScrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        return scrollView
+    }()
+    
+    private let mainStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.isLayoutMarginsRelativeArrangement = true
+        stackView.layoutMargins = .init(
+            top: Metric.sectionTitleTopInset,
+            left: Metric.horizontalInset,
+            bottom: Metric.bottomInset,
+            right: Metric.horizontalInset
+        )
+        stackView.spacing = 20
+        return stackView
     }()
     
     private let sectionTitle: UILabel = {
@@ -185,43 +206,58 @@ private extension SetAlarmViewController {
         
         [
             navigationBar,
+            mainScrollView
+        ]
+            .forEach {
+                view.addSubview($0)
+            }
+        
+        mainScrollView.addSubview(mainStackView)
+        
+        [
             sectionTitle,
             rowStack,
             directlySettingButton
         ]
             .forEach {
-                view.addSubview($0)
+                mainStackView.addArrangedSubview($0)
             }
-        [row1, row2, row3, row4].forEach {
-            rowStack.addArrangedSubview($0)
-        }
+        
+        [
+            row1,
+            row2,
+            row3,
+            row4
+        ]
+            .forEach {
+                rowStack.addArrangedSubview($0)
+            }
     }
     
     func setConstraints() {
         
-        navigationBar.snp.makeConstraints { make in
-            make.top.left.right.equalTo(self.view.safeAreaLayoutGuide)
-            make.height.equalTo(Metric.NavigationBar.height)
+        navigationBar.snp.makeConstraints {
+            $0.top.left.right.equalTo(self.view.safeAreaLayoutGuide)
+            $0.height.equalTo(Metric.NavigationBar.height)
         }
         
-        backButton.snp.makeConstraints { make in
-            make.centerY.equalToSuperview()
-            make.left.equalToSuperview().inset(Metric.NavigationBar.backButtonLeftMargin)
+        backButton.snp.makeConstraints {
+            $0.centerY.equalToSuperview()
+            $0.left.equalToSuperview().inset(Metric.NavigationBar.backButtonLeftMargin)
         }
         
-        sectionTitle.snp.makeConstraints {
-            $0.leading.equalToSuperview().inset(Metric.horizontalInset)
-            $0.top.equalTo(navigationBar.snp.bottom).offset(Metric.sectionTitleTopInset)
+        mainScrollView.snp.makeConstraints {
+            $0.top.equalTo(navigationBar.snp.bottom)
+            $0.leading.trailing.equalTo(view.safeAreaLayoutGuide)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide)
         }
         
-        rowStack.snp.makeConstraints {
-            $0.top.equalTo(sectionTitle.snp.bottom).offset(Metric.rowStackTopInset)
-            $0.leading.trailing.equalToSuperview().inset(Metric.horizontalInset)
+        mainStackView.snp.makeConstraints {
+            $0.top.bottom.leading.trailing.equalToSuperview()
+            $0.width.equalTo(mainScrollView.frameLayoutGuide)
         }
         
         directlySettingButton.snp.makeConstraints {
-            $0.top.equalTo(rowStack.snp.bottom).offset(Metric.rowStackSpacing)
-            $0.leading.trailing.equalToSuperview().inset(Metric.horizontalInset)
             $0.height.equalTo(Metric.buttonHeight)
         }
     }

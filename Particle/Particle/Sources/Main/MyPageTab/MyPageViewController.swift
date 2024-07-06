@@ -121,11 +121,11 @@ final class MyPageViewController: UIViewController, MyPagePresentable, MyPageVie
 //        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(showMyArticleButtonTapped))
 //        showMyArticleButton.addGestureRecognizer(tapGesture)
         
-//        addRows(
-//            icon: .particleImage.bell,
-//            title: "알림 설정",
-//            selector: #selector(setAlarmButtonTapped)
-//        )
+        addRows(
+            icon: .particleImage.bell,
+            title: "알림 설정",
+            selector: #selector(setAlarmButtonTapped)
+        )
         addRows(
             icon: .particleImage.tag,
             title: "관심 태그 설정",
