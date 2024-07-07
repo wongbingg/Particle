@@ -16,9 +16,16 @@ protocol SetAlarmPresentableListener: AnyObject {
 }
 
 final class SetAlarmViewController: UIViewController, SetAlarmPresentable, SetAlarmViewControllable {
-
+    
     weak var listener: SetAlarmPresentableListener?
     private var disposeBag = DisposeBag()
+    
+    enum Strings {
+        static let alarmAt8Key = "출근할 때 한 번 더 보기"
+        static let alarmAt12Key = "점심시간에 한 번 더 보기"
+        static let alarmAt19Key = "퇴근할 때 한 번 더 보기"
+        static let alarmAt22Key = "자기전에 한 번 더 보기"
+    }
     
     enum Metric {
         
@@ -84,54 +91,42 @@ final class SetAlarmViewController: UIViewController, SetAlarmPresentable, SetAl
     }()
     
     private let row1: AlarmToggleRow = {
-        let title = "출근할 때 한 번 더 보기"
+        let title = Strings.alarmAt8Key
         
         let row = AlarmToggleRow(
             title: title,
             description: "8시에 알림을 드릴게요"
-        ) { state in
-            
-            UserDefaults.standard.set(state, forKey: title)
-        }
+        )
         return row
     }()
     
     private let row2: AlarmToggleRow = {
-        let title = "점심시간에 한 번 더 보기"
+        let title = Strings.alarmAt12Key
         
         let row = AlarmToggleRow(
             title: title,
             description: "12시에 알림을 드릴게요"
-        ) { state in
-            
-            UserDefaults.standard.set(state, forKey: title)
-        }
+        )
         return row
     }()
     
     private let row3: AlarmToggleRow = {
-        let title = "퇴근할 때 한 번 더 보기"
+        let title = Strings.alarmAt19Key
         
         let row = AlarmToggleRow(
             title: title,
-            description: "7시에 알림을 드릴게요"
-        ) { state in
-            
-            UserDefaults.standard.set(state, forKey: title)
-        }
+            description: "저녁 7시에 알림을 드릴게요"
+        )
         return row
     }()
     
     private let row4: AlarmToggleRow = {
-        let title = "자기전에 한 번 더 보기"
+        let title = Strings.alarmAt22Key
         
         let row = AlarmToggleRow(
             title: title,
-            description: "10시에 알림을 드릴게요"
-        ) { state in
-            
-            UserDefaults.standard.set(state, forKey: title)
-        }
+            description: "저녁 10시에 알림을 드릴게요"
+        )
         return row
     }()
     
@@ -173,8 +168,87 @@ final class SetAlarmViewController: UIViewController, SetAlarmPresentable, SetAl
         setConstraints()
         configureButton()
     }
-
+    
+    // MARK: - SetAlarmPresentable
+    
+    func updatePendingInfo(list: [String]) {
+        DispatchQueue.main.async { [weak self] in
+            self?.row1.toggleButton.isOn = list.contains(Strings.alarmAt8Key)
+            self?.row2.toggleButton.isOn = list.contains(Strings.alarmAt12Key)
+            self?.row3.toggleButton.isOn = list.contains(Strings.alarmAt19Key)
+            self?.row4.toggleButton.isOn = list.contains(Strings.alarmAt22Key)
+            
+            self?.bind()
+        }
+    }
+    
     // MARK: - Methods
+    
+    private func bind() {
+        row1.toggleButton.rx.isOn
+            .skip(1)
+            .bind { state in
+                if state {
+                    LocalAlarmManager.scheduleDailyLocalNotification(
+                        identifier: Strings.alarmAt8Key,
+                        title: "제목",
+                        body: "8출근할 때 한 번 더 보기",
+                        hour: 8,
+                        minute: 0)
+                } else {
+                    LocalAlarmManager.cancelLocalNotification(identifier: Strings.alarmAt8Key)
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        row2.toggleButton.rx.isOn
+            .skip(1)
+            .bind { state in
+                if state {
+                    LocalAlarmManager.scheduleDailyLocalNotification(
+                        identifier: Strings.alarmAt12Key,
+                        title: "제목",
+                        body: "12점심시간에 한 번 더 보기",
+                        hour: 12,
+                        minute: 0)
+                } else {
+                    LocalAlarmManager.cancelLocalNotification(identifier: Strings.alarmAt12Key)
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        row3.toggleButton.rx.isOn
+            .skip(1)
+            .bind { state in
+                if state {
+                    LocalAlarmManager.scheduleDailyLocalNotification(
+                        identifier: Strings.alarmAt19Key,
+                        title: "제목",
+                        body: "19퇴근할 때 한 번 더 보기",
+                        hour: 19,
+                        minute: 0)
+                } else {
+                    LocalAlarmManager.cancelLocalNotification(identifier: Strings.alarmAt19Key)
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        row4.toggleButton.rx.isOn
+            .skip(1)
+            .bind { state in
+                if state {
+                    LocalAlarmManager.scheduleDailyLocalNotification(
+                        identifier: Strings.alarmAt22Key,
+                        title: "제목",
+                        body: "22자기전에 한 번 더 보기",
+                        hour: 22,
+                        minute: 0)
+                } else {
+                    LocalAlarmManager.cancelLocalNotification(identifier: Strings.alarmAt22Key)
+                }
+            }
+            .disposed(by: disposeBag)
+    }
     
     private func configureButton() {
         let tapGesture = UITapGestureRecognizer(
@@ -190,7 +264,6 @@ final class SetAlarmViewController: UIViewController, SetAlarmPresentable, SetAl
     }
     
     @objc private func directlySettingButtonTapped() {
-        Console.debug("직접설정하기 탭ㅃ!")
         listener?.setAlarmDirectlySettingButtonTapped()
     }
 }

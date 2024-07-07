@@ -16,6 +16,8 @@ protocol SetAlarmRouting: ViewableRouting {
 protocol SetAlarmPresentable: Presentable {
     var listener: SetAlarmPresentableListener? { get set }
     // TODO: Declare methods the interactor can invoke the presenter to present data.
+    
+    func updatePendingInfo(list: [String])
 }
 
 protocol SetAlarmListener: AnyObject {
@@ -37,6 +39,9 @@ final class SetAlarmInteractor: PresentableInteractor<SetAlarmPresentable>, SetA
     override func didBecomeActive() {
         super.didBecomeActive()
         // TODO: Implement business logic here.
+        LocalAlarmManager.fetchPendingNotifications { [weak self] in
+            self?.presenter.updatePendingInfo(list: $0)
+        }
     }
 
     override func willResignActive() {
@@ -47,7 +52,6 @@ final class SetAlarmInteractor: PresentableInteractor<SetAlarmPresentable>, SetA
     // MARK: - SetAlarmPresentableListener
     
     func setAlarmBackButtonTapped() {
-        handleLocalNotificationRegistration()
         listener?.setAlarmBackButtonTapped()
     }
     
@@ -59,23 +63,6 @@ final class SetAlarmInteractor: PresentableInteractor<SetAlarmPresentable>, SetA
         router?.detachDirectlySetAlarm()
     }
     
-    func handleLocalNotificationRegistration() {
-        
-        removeAllLocalNotifications()
-
-        let alarms = [
-            ("출근할 때 한 번 더 보기", "20000101 08:00:00"),
-            ("점심시간에 한 번 더 보기", "20000101 12:00:00"),
-            ("퇴근할 때 한 번 더 보기", "20000101 19:00:00"),
-            ("자기전에 한 번 더 보기", "20000101 22:00:00")
-        ]
-        
-        alarms.forEach {
-            if UserDefaults.standard.bool(forKey: $0.0) {
-                addLocalNotification(identifier: $0.0, title: "title정하기", body: "body정하기", timeHHmm: $0.1)
-            }
-        }
-    }
     
     // MARK: - Methods
     
@@ -108,5 +95,54 @@ final class SetAlarmInteractor: PresentableInteractor<SetAlarmPresentable>, SetA
         let notificationCenter = UNUserNotificationCenter.current()
         notificationCenter.removeAllPendingNotificationRequests()
         notificationCenter.removeAllDeliveredNotifications()
+    }
+}
+
+struct LocalAlarmManager {
+    // 특정 시:분에 매일 로컬 푸시 알림 등록
+    static func scheduleDailyLocalNotification(identifier: String, title: String, body: String, hour: Int, minute: Int) {
+        // 알림 내용 구성
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = UNNotificationSound.default
+
+        // 트리거 설정 (특정 시:분에 매일 반복)
+        var dateComponents = DateComponents()
+        dateComponents.hour = hour
+        dateComponents.minute = minute
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+
+        // 알림 요청 생성
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+
+        // 알림 센터에 요청 추가
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Error adding notification: \(error.localizedDescription)")
+            } else {
+                print("Notification scheduled with identifier: \(identifier)")
+            }
+        }
+    }
+
+    // 로컬 푸시 알림 취소
+    static func cancelLocalNotification(identifier: String) {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [identifier])
+        print("Notification cancelled with identifier: \(identifier)")
+    }
+    
+    // 특정 identifier가 등록되어 있는지 확인
+    static func isNotificationScheduled(identifier: String, completion: @escaping (Bool) -> Void) {
+        UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
+            let isScheduled = requests.contains { $0.identifier == identifier }
+            completion(isScheduled)
+        }
+    }
+    
+    static func fetchPendingNotifications(_ completion: @escaping ([String]) -> Void) {
+        UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
+            completion(requests.map { $0.identifier })
+        }
     }
 }

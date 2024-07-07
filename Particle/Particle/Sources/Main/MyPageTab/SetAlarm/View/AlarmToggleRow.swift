@@ -21,7 +21,7 @@ final class AlarmToggleRow: UIView {
         return label
     }()
     
-    private let toggleButton: UISwitch = {
+    let toggleButton: UISwitch = {
         let button = UISwitch()
         button.onTintColor = .particleColor.main100
         return button
@@ -44,14 +44,12 @@ final class AlarmToggleRow: UIView {
     
     // MARK: - Initializers
     
-    init(title: String, description: String, handler: @escaping (Bool) -> Void) {
+    init(title: String, description: String) {
         super.init(frame: .zero)
         addSubviews()
         setConstraints()
         setupInitialView()
         setupInitialData(title: title, description: description)
-        
-        bind(handler)
     }
     
     required init?(coder: NSCoder) {
@@ -68,14 +66,6 @@ final class AlarmToggleRow: UIView {
     private func setupInitialData(title: String, description: String) {
         titleLabel.text = title
         descriptionLabel.text = description
-        toggleButton.isOn =  UserDefaults.standard.bool(forKey: title)
-    }
-    
-    private func bind(_ handler: @escaping (Bool) -> Void) {
-        toggleButton.rx.isOn.bind { state in
-            handler(state)
-        }
-        .disposed(by: disposeBag)
     }
 }
 
@@ -133,9 +123,7 @@ import SnapKit
 struct AlarmToggleRow_Preview: PreviewProvider {
     
     static let alarmToggleRow: AlarmToggleRow = {
-        let row = AlarmToggleRow(title: "출근할 때 한번 더 보기", description: "8시에 알림을 드릴게요") { state in
-            Console.debug("state is \(state)")
-        }
+        let row = AlarmToggleRow(title: "출근할 때 한번 더 보기", description: "8시에 알림을 드릴게요")
         return row
     }()
     
