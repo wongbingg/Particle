@@ -20,6 +20,10 @@ final class DirectlySetAlarmViewController: UIViewController,
     weak var listener: DirectlySetAlarmPresentableListener?
     private var disposeBag = DisposeBag()
     
+    enum Strings {
+        static let alarmKey = "직접알림"
+    }
+    
     enum Metric {
         enum NavigationBar {
             static let height = 44
@@ -85,7 +89,15 @@ final class DirectlySetAlarmViewController: UIViewController,
     }()
     
     private let alarmActivateButton = RadioButton(title: "활성화")
-    private let alarmDeactivateButton = RadioButton(title: "비활성화")
+
+    private let registeredAlarmTimeLabel: UILabel = {
+        let label = UILabel()
+        return label
+    }()
+    
+    private var datePickerTime: (hour: Int, minute: Int) {
+        fetchDatePickerTime()
+    }
     
     // MARK: - Initializers
     
@@ -105,8 +117,16 @@ final class DirectlySetAlarmViewController: UIViewController,
         addSubviews()
         setConstraints()
         configureButton()
-        setInitialState()
-        bind()
+        setInitialData()
+    }
+    
+    // MARK: - DirectlySetAlarmPresentable
+    func updatePendingInfo(list: [String]) {
+        DispatchQueue.main.async { [weak self] in
+            self?.alarmActivateButton.state.accept(list.contains(Strings.alarmKey))
+            self?.registeredAlarmTimeLabel.isHidden = !list.contains(Strings.alarmKey)
+            self?.bind()
+        }
     }
     
     // MARK: - Methods
@@ -116,8 +136,52 @@ final class DirectlySetAlarmViewController: UIViewController,
         view.endEditing(true)
     }
     
-    private func setInitialState() {
-        alarmDeactivateButton.state.accept(true)
+    func showRegisterSuccessAlert() {
+        let okButton = generateAlertButton(title: "확인") { [weak self] in
+            self?.dismiss(animated: true)
+        }
+        
+        let alert = ParticleAlertController(
+            title: nil,
+            body: "\(datePickerTime.hour)시 \(datePickerTime.minute)분 알람 적용이 완료되었어요!",
+            buttons: [okButton],
+            buttonsAxis: .horizontal
+        )
+        
+        present(alert, animated: true) { [weak self] in
+            guard let self = self else { return }
+            registeredAlarmTimeLabel.isHidden = false
+            registeredAlarmTimeLabel.setParticleFont(
+                .p_body01_bold,
+                color: .white,
+                text: "\(datePickerTime.hour) : \(datePickerTime.minute)")
+        }
+    }
+    
+    func showUnregisterSuccessAlert() {
+        let okButton = generateAlertButton(title: "확인") { [weak self] in
+            self?.dismiss(animated: true)
+        }
+        
+        let alert = ParticleAlertController(
+            title: nil,
+            body: "알람 적용이 정상적으로 해제되었어요!",
+            buttons: [okButton],
+            buttonsAxis: .horizontal
+        )
+        
+        present(alert, animated: true) { [weak self] in
+            guard let self = self else { return }
+            registeredAlarmTimeLabel.isHidden = true
+        }
+    }
+    
+    private func setInitialData() {
+        let registeredAlarmTime = UserDefaults.standard.string(forKey: Strings.alarmKey)
+        registeredAlarmTimeLabel.setParticleFont(
+            .p_body01_bold,
+            color: .white,
+            text: registeredAlarmTime)
     }
     
     private func configureButton() {
@@ -128,18 +192,57 @@ final class DirectlySetAlarmViewController: UIViewController,
     }
     
     private func bind() {
-        alarmActivateButton.state.bind { [weak self] isTapped in
-            guard isTapped else { return }
-            self?.alarmDeactivateButton.state.accept(false)
-            
+        alarmActivateButton.state
+            .skip(1)
+            .bind { [weak self] isTapped in
+                guard let self = self else { return }
+                if isTapped {
+                    let hhmm: (Int, Int) = fetchDatePickerTime()
+                    UserDefaults.standard.setValue("\(hhmm.0):\(hhmm.1)", forKey: Strings.alarmKey)
+                    LocalAlarmManager.scheduleDailyLocalNotification(
+                        identifier: Strings.alarmKey,
+                        title: "직접",
+                        body: "설정한 알림",
+                        hour: hhmm.0,
+                        minute: hhmm.1)
+                    showRegisterSuccessAlert()
+                } else {
+                    UserDefaults.standard.removeObject(forKey: Strings.alarmKey)
+                    LocalAlarmManager.cancelLocalNotification(identifier: Strings.alarmKey)
+                    showUnregisterSuccessAlert()
+                }
+            }
+            .disposed(by: disposeBag)
+    }
+    
+    private func fetchDatePickerTime() -> (Int, Int) {
+        // 선택한 날짜와 시간 가져오기
+        let selectedDate = datePicker.date
+
+        // Calendar를 사용하여 시와 분 추출
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.hour, .minute], from: selectedDate)
+        if let hour = components.hour, let minute = components.minute {
+            print("선택한 시간: \(hour)시 \(minute)분")
+            return (hour, minute)
+        }
+        return (0, 0)
+    }
+    
+    private func generateAlertButton(title: String, _ buttonAction: @escaping () -> Void) -> UIButton {
+        let button = UIButton()
+        button.setTitle(title, for: .normal)
+        button.setTitleColor(.systemBlue, for: .normal)
+        button.snp.makeConstraints {
+            $0.height.equalTo(44)
+        }
+        
+        button.rx.tap.bind { [weak self] _ in
+            buttonAction()
         }
         .disposed(by: disposeBag)
         
-        alarmDeactivateButton.state.bind { [weak self] isTapped in
-            guard isTapped else { return }
-            self?.alarmActivateButton.state.accept(false)
-        }
-        .disposed(by: disposeBag)
+        return button
     }
 }
 
@@ -154,11 +257,9 @@ private extension DirectlySetAlarmViewController {
         [
             navigationBar,
             datePicker,
-            alarmNameSectionTitle,
-            alarmNameTextField,
             alarmActivateSectionTitle,
             alarmActivateButton,
-            alarmDeactivateButton
+            registeredAlarmTimeLabel
         ]
             .forEach {
                 view.addSubview($0)
@@ -181,18 +282,9 @@ private extension DirectlySetAlarmViewController {
             $0.top.equalTo(navigationBar.snp.bottom).offset(40)
             $0.centerX.equalToSuperview()
         }
-        alarmNameSectionTitle.snp.makeConstraints {
-            $0.top.equalTo(datePicker.snp.bottom).offset(22)
-            $0.leading.equalToSuperview().inset(20)
-        }
-        alarmNameTextField.snp.makeConstraints {
-            $0.top.equalTo(alarmNameSectionTitle.snp.bottom).offset(12)
-            $0.leading.trailing.equalToSuperview().inset(20)
-            $0.height.equalTo(44)
-        }
         alarmActivateSectionTitle.snp.makeConstraints {
-            $0.top.equalTo(alarmNameTextField.snp.bottom).offset(24)
-            $0.leading.equalToSuperview().inset(20)
+            $0.top.equalTo(datePicker.snp.bottom).offset(24)
+            $0.leading.trailing.equalToSuperview().inset(20)
         }
         alarmActivateButton.snp.makeConstraints {
             $0.top.equalTo(alarmActivateSectionTitle.snp.bottom).offset(12)
@@ -200,11 +292,9 @@ private extension DirectlySetAlarmViewController {
             $0.width.equalTo((DeviceSize.width-48)/2)
             $0.height.equalTo(44)
         }
-        alarmDeactivateButton.snp.makeConstraints {
-            $0.top.equalTo(alarmActivateSectionTitle.snp.bottom).offset(12)
-            $0.trailing.equalToSuperview().inset(20)
-            $0.width.equalTo((DeviceSize.width-48)/2)
-            $0.height.equalTo(44)
+        registeredAlarmTimeLabel.snp.makeConstraints {
+            $0.centerY.equalTo(alarmActivateButton)
+            $0.leading.equalTo(alarmActivateButton.snp.trailing).offset(20)
         }
     }
 }
@@ -222,13 +312,13 @@ struct DirectlySetAlarmViewController_Preview: PreviewProvider {
 }
 #endif
 extension UIDatePicker {
-
-var textColor: UIColor? {
-    set {
-        setValue(newValue, forKeyPath: "textColor")
+    
+    var textColor: UIColor? {
+        set {
+            setValue(newValue, forKeyPath: "textColor")
+        }
+        get {
+            return value(forKeyPath: "textColor") as? UIColor
+        }
     }
-    get {
-        return value(forKeyPath: "textColor") as? UIColor
-    }
-  }
 }

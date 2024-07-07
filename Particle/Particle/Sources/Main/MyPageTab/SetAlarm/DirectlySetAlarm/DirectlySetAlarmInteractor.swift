@@ -15,6 +15,7 @@ protocol DirectlySetAlarmRouting: ViewableRouting {
 protocol DirectlySetAlarmPresentable: Presentable {
     var listener: DirectlySetAlarmPresentableListener? { get set }
     // TODO: Declare methods the interactor can invoke the presenter to present data.
+    func updatePendingInfo(list: [String])
 }
 
 protocol DirectlySetAlarmListener: AnyObject {
@@ -38,6 +39,9 @@ final class DirectlySetAlarmInteractor: PresentableInteractor<DirectlySetAlarmPr
     override func didBecomeActive() {
         super.didBecomeActive()
         // TODO: Implement business logic here.
+        LocalAlarmManager.fetchPendingNotifications { [weak self] in
+            self?.presenter.updatePendingInfo(list: $0)
+        }
     }
 
     override func willResignActive() {
