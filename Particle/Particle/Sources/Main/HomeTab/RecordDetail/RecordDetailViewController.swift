@@ -28,6 +28,7 @@ final class RecordDetailViewController: UIViewController,
     private let isMyRecord: Bool
     private let editable: Bool
     private var errorDescription = ""
+    private var isLike: BehaviorRelay<Bool> = .init(value: false)
     
     enum Metric {
         static let horizontalInset = 20
@@ -335,6 +336,14 @@ final class RecordDetailViewController: UIViewController,
                 cell.titleLabel.text = item
             }
             .disposed(by: disposeBag)
+        
+        isLike
+            .bind { [weak self] bool in
+                guard let self = self else { return }
+                heartButton.setImage(UIImage(named: bool ? "heartFull" : "heart"), for: .normal)
+                // bool ? 좋아요 등록 : 좋아요 취소
+            }
+            .disposed(by: disposeBag)
     }
     
     private func configureButton() {
@@ -368,6 +377,14 @@ final class RecordDetailViewController: UIViewController,
         cancelButton.rx.tap
             .bind { [weak self] _ in
                 self?.dismiss(animated: true)
+            }
+            .disposed(by: self.disposeBag)
+        
+        heartButton.rx.tap
+            .bind { [weak self] _ in
+                guard let self = self else { return }
+                let current = isLike.value
+                isLike.accept(!current)
             }
             .disposed(by: self.disposeBag)
     }
@@ -570,24 +587,15 @@ struct RecordDetailViewController_Preview: PreviewProvider {
             .init(content: "개인적으로 나는 매일 글쓰는 일을 습관처럼 하고 있다.", isMain: true),
             .init(content: "그러나 처음부터 글을 습관처럼 매일 쓸 수 있었던 건 아니다.", isMain: false),
             .init(content: "하지만 당시에는 작가가 되고 싶다는 열망 하나를 갖고 있었고, 그 젊은 열망에 따라 어떻게", isMain: false),
-            .init(content: "하지만 당시에는 작가가 되고 싶다는 열망 하나를 갖고 있었고, 그 젊은 열망에 따라 어떻게", isMain: false),
-            .init(content: "하지만 당시에는 작가가 되고 싶다는 열망 하나를 갖고 있었고, 그 젊은 열망에 따라 어떻게", isMain: false),
-            .init(content: "하지만 당시에는 작가가 되고 싶다는 열망 하나를 갖고 있었고, 그 젊은 열망에 따라 어떻게", isMain: false),
-            .init(content: "하지만 당시에는 작가가 되고 싶다는 열망 하나를 갖고 있었고, 그 젊은 열망에 따라 어떻게", isMain: false),
-            .init(content: "하지만 당시에는 작가가 되고 싶다는 열망 하나를 갖고 있었고, 그 젊은 열망에 따라 어떻게", isMain: false),
-            .init(content: "하지만 당시에는 작가가 되고 싶다는 열망 하나를 갖고 있었고, 그 젊은 열망에 따라 어떻게", isMain: false),
-            .init(content: "하지만 당시에는 작가가 되고 싶다는 열망 하나를 갖고 있었고, 그 젊은 열망에 따라 어떻게", isMain: false),
-            .init(content: "하지만 당시에는 작가가 되고 싶다는 열망 하나를 갖고 있었고, 그 젊은 열망에 따라 어떻게", isMain: false),
-            .init(content: "하지만 당시에는 작가가 되고 싶다는 열망 하나를 갖고 있었고, 그 젊은 열망에 따라 어떻게", isMain: false)
         ],
-        tags: ["#UXUI", "#브랜딩", "#브랜akzpzld딩", "#브랜딩", "#브랜딩"],
+        tags: ["#UXUI", "#브랜딩", "#브랜딩", "#브랜딩"],
         attribute: .init(color: "YELLOW", style: "TEXT"),
         createdAt: "2023-09-18T11:49:52",
         createdBy: "노란 동그라미"
     )
     
     static var previews: some View {
-        RecordDetailViewController(data: data).showPreview()
+        RecordDetailViewController(data: data).showPreview(.iPhone8)
     }
 }
 #endif
