@@ -338,10 +338,11 @@ final class RecordDetailViewController: UIViewController,
             .disposed(by: disposeBag)
         
         isLike
+            .skip(1)
             .bind { [weak self] bool in
                 guard let self = self else { return }
                 heartButton.setImage(UIImage(named: bool ? "heartFull" : "heart"), for: .normal)
-                // bool ? 좋아요 등록 : 좋아요 취소
+                bool ? view.showToast(message: "좋아요가 등록되었어요 !") : view.showToast(message: "좋아요가 취소되었어요.")
             }
             .disposed(by: disposeBag)
     }
