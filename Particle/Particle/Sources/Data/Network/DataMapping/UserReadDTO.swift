@@ -10,4 +10,5 @@ struct UserReadDTO: Decodable {
     let nickname: String
     let profileImageUrl: String
     let interestedTags: [String]
+    let interestedRecords: [String]
 }

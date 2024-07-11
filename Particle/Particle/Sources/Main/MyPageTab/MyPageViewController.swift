@@ -22,7 +22,14 @@ final class MyPageViewController: UIViewController, MyPagePresentable, MyPageVie
     
     weak var listener: MyPagePresentableListener?
     private var disposeBag = DisposeBag()
-    private var data: BehaviorRelay<UserReadDTO> = .init(value: .init(id: "", nickname: "", profileImageUrl: "", interestedTags: [], interestedRecords: []))
+    private var data: BehaviorRelay<UserReadDTO> = .init(
+        value: .init(
+            id: "",
+            nickname: "",
+            profileImageUrl: "",
+            interestedTags: [],
+            interestedRecords: [])
+    )
     
     // MARK: - UIComponents
     

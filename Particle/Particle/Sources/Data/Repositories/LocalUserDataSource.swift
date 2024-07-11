@@ -30,7 +30,8 @@ extension LocalUserDataSource {
                         id: user.id ?? "",
                         nickname: user.nickName ?? "",
                         profileImageUrl: user.profileImageUrl ?? "",
-                        interestedTags: user.interestedTags ?? []
+                        interestedTags: user.interestedTags ?? [],
+                        interestedRecords: user.interestedRecords ?? []
                     )
                 )
             } catch {

@@ -2,7 +2,7 @@
 //  CDUser+CoreDataProperties.swift
 //  
 //
-//  Created by 이원빈 on 2024/01/13.
+//  Created by 이원빈 on 2024/07/11.
 //
 //
 
@@ -17,8 +17,9 @@ extension CDUser {
     }
 
     @NSManaged public var id: String?
+    @NSManaged public var interestedTags: [String]?
     @NSManaged public var nickName: String?
     @NSManaged public var profileImageUrl: String?
-    @NSManaged public var interestedTags: [String]?
+    @NSManaged public var interestedRecords: NSObject?
 
 }
