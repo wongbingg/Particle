@@ -22,7 +22,7 @@ final class MyPageViewController: UIViewController, MyPagePresentable, MyPageVie
     
     weak var listener: MyPagePresentableListener?
     private var disposeBag = DisposeBag()
-    private var data: BehaviorRelay<UserReadDTO> = .init(value: .init(id: "", nickname: "", profileImageUrl: "", interestedTags: []))
+    private var data: BehaviorRelay<UserReadDTO> = .init(value: .init(id: "", nickname: "", profileImageUrl: "", interestedTags: [], interestedRecords: []))
     
     // MARK: - UIComponents
     
@@ -118,8 +118,8 @@ final class MyPageViewController: UIViewController, MyPagePresentable, MyPageVie
         addSubviews()
         setConstraints()
         
-//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(showMyArticleButtonTapped))
-//        showMyArticleButton.addGestureRecognizer(tapGesture)
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(showMyArticleButtonTapped))
+        showMyArticleButton.addGestureRecognizer(tapGesture)
         
         addRows(
             icon: .particleImage.bell,
@@ -229,7 +229,7 @@ private extension MyPageViewController {
             profileImageView,
             nickNameLabel,
             idLabel,
-//            showMyArticleButton,
+            showMyArticleButton,
             sectionTitle,
             stackView
         ]
@@ -255,14 +255,14 @@ private extension MyPageViewController {
             $0.top.equalTo(nickNameLabel.snp.bottom).offset(4)
         }
         
-//        showMyArticleButton.snp.makeConstraints {
-//            $0.leading.trailing.equalToSuperview().inset(20)
-//            $0.height.equalTo(59)
-//            $0.top.equalTo(profileImageView.snp.bottom).offset(24)
-//        }
+        showMyArticleButton.snp.makeConstraints {
+            $0.leading.trailing.equalToSuperview().inset(20)
+            $0.height.equalTo(59)
+            $0.top.equalTo(profileImageView.snp.bottom).offset(24)
+        }
         
         sectionTitle.snp.makeConstraints {
-            $0.top.equalTo(idLabel.snp.bottom).offset(30)
+            $0.top.equalTo(showMyArticleButton.snp.bottom).offset(30)
             $0.leading.equalToSuperview().inset(20)
         }
         
@@ -282,7 +282,7 @@ import SwiftUI
 @available(iOS 13.0, *)
 struct MyPageViewController_Preview: PreviewProvider {
     static var previews: some View {
-        MyPageViewController().showPreview()
+        MyPageViewController().showPreview(.iPhone8)
     }
 }
 #endif
