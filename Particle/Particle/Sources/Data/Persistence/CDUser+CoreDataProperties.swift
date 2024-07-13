@@ -20,6 +20,6 @@ extension CDUser {
     @NSManaged public var interestedTags: [String]?
     @NSManaged public var nickName: String?
     @NSManaged public var profileImageUrl: String?
-    @NSManaged public var interestedRecords: NSObject?
+    @NSManaged public var interestedRecords: [String]?
 
 }
