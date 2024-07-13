@@ -9,7 +9,7 @@ import Foundation
 import RxSwift
 
 protocol SetInterestedTagsUseCase {
-    func execute(tags: [String]) -> Observable<Bool>
+    func execute(tags: [String]) throws
 }
 
 final class DefaultSetInterestedTagsUseCase: SetInterestedTagsUseCase {
@@ -19,12 +19,7 @@ final class DefaultSetInterestedTagsUseCase: SetInterestedTagsUseCase {
         self.userRepository = userRepository
     }
     
-    func execute(tags: [String]) -> Observable<Bool> {
-        userRepository.setInterestedTags(tags: tags)
-            .map { dto in
-                UserDefaults.standard.set(dto.interestedTags.map { "#\($0)" }, forKey: "INTERESTED_TAGS")
-                return true
-            }
-//            .catchAndReturn(false)
+    func execute(tags: [String]) throws {
+        try userRepository.setInterestedTags(tags: tags)
     }
 }

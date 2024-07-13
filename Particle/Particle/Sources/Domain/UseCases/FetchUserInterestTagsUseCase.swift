@@ -9,7 +9,7 @@ import Foundation
 import RxSwift
 
 protocol FetchUserInterestTagsUseCase {
-    func execute() -> Observable<[String]>
+    func execute() throws -> [String]
 }
 
 struct DefaultFetchUserInterestTagsUseCase: FetchUserInterestTagsUseCase {
@@ -19,7 +19,7 @@ struct DefaultFetchUserInterestTagsUseCase: FetchUserInterestTagsUseCase {
         self.userRepository = userRepository
     }
     
-    func execute() -> Observable<[String]> {
-        userRepository.getInterestedTags()
+    func execute() throws -> [String] {
+        try userRepository.getInterestedTags()
     }
 }

@@ -8,7 +8,7 @@
 import RxSwift
 
 protocol FetchMyProfileUseCase {
-    func execute() -> Observable<UserReadDTO>
+    func execute() throws -> UserReadDTO
 }
 
 final class DefaultFetchMyProfileUseCase: FetchMyProfileUseCase {
@@ -18,7 +18,7 @@ final class DefaultFetchMyProfileUseCase: FetchMyProfileUseCase {
         self.userRepository = userRepository
     }
     
-    func execute() -> Observable<UserReadDTO> {
-        userRepository.getMyProfile()
+    func execute() throws -> UserReadDTO {
+        try userRepository.getMyProfile()
     }
 }
