@@ -40,8 +40,8 @@ final class Accordion: UIView {
     
     private var disposeBag = DisposeBag()
     private var interestedTags: [String] {
-        if let interestedTags = UserDefaults.standard.object(forKey: "INTERESTED_TAGS") as? [String] {
-            return interestedTags
+        if let interestedTags = UserSingleton.shared.info?.interestedTags {
+            return interestedTags.map { "#\($0)" }
         } else {
             return []
         }

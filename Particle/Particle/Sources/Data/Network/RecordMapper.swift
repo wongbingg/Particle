@@ -15,7 +15,7 @@ protocol RecordMapperProtocol {
 struct RecordMapper: RecordMapperProtocol {
     
     func mapRecords(model: [RecordReadDTO]) -> [SectionOfRecordTag] {
-        guard let userInterestedTags = UserDefaults.standard.object(forKey: "INTERESTED_TAGS") as? [String] else {
+        guard let userInterestedTags = UserSingleton.shared.info?.interestedTags else {
             return []
         }
         guard model.isEmpty == false else { return [] }
@@ -24,8 +24,8 @@ struct RecordMapper: RecordMapperProtocol {
             a.fetchDate().timeIntervalSince1970 > b.fetchDate().timeIntervalSince1970
         }
         var sectionList: [SectionOfRecordTag] = [.init(header: "My", items: sortedModel)]
-        let tags = userInterestedTags.map { $0.replacingOccurrences(of: "#", with: "")}
-        for tag in tags {
+//        let tags = userInterestedTags.map { $0.replacingOccurrences(of: "#", with: "")}
+        for tag in userInterestedTags {
             let filteredList = sortedModel.filter { $0.tags.contains(tag) }
             if filteredList.isEmpty == false {
                 sectionList.append(.init(header: tag, items: filteredList))

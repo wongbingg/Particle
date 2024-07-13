@@ -337,6 +337,11 @@ final class RecordDetailViewController: UIViewController,
             }
             .disposed(by: disposeBag)
         
+        guard let interestedRecords = UserSingleton.shared.info?.interestedRecords else { return }
+        let bool = interestedRecords.contains(data.value.id)
+        isLike.accept(bool)
+        heartButton.setImage(UIImage(named: bool ? "heartFull" : "heart"), for: .normal)
+        
         isLike
             .skip(1)
             .bind { [weak self] bool in

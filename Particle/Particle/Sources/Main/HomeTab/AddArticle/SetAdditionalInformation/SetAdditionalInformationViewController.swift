@@ -335,8 +335,8 @@ final class SetAdditionalInformationViewController: UIViewController,
     }
     
     private func fetchInterestedTags() {
-        guard let userInterestedTags = UserDefaults.standard.object(forKey: "INTERESTED_TAGS") as? [String] else { return }
-        let fetchedTags = userInterestedTags.map { ($0, false) }
+        guard let userInterestedTags = UserSingleton.shared.info?.interestedTags else { return }
+        let fetchedTags = userInterestedTags.map { ("#\($0)", false) }
         tags.accept(fetchedTags)
     }
     
