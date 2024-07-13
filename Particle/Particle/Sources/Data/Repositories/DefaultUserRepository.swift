@@ -16,17 +16,29 @@ final class DefaultUserRepository: UserRepository {
         self.userDataSource = userDataSource
     }
     
-    func getMyProfile() -> RxSwift.Observable<UserReadDTO> {
-        return userDataSource.getMyProfile()
+    func getMyProfile() throws -> UserReadDTO {
+        return try userDataSource.getMyProfile()
     }
     
-    func setInterestedTags(tags: [String]) -> RxSwift.Observable<UserReadDTO> {
-        return userDataSource.setInterestedTags(tags: tags)
+    func setMyProfile(dto: UserReadDTO) throws {
+        try self.userDataSource.setMyProfile(dto: dto)
     }
     
-    func getInterestedTags() -> Observable<[String]> {
-        guard let tags = UserDefaults.standard.stringArray(forKey: "INTERESTED_TAGS") else { return Observable.just([])
-        }
-        return Observable.just(tags)
+    func getInterestedTags() throws -> [String] {
+        return try userDataSource.getInterestedTags()
     }
+    
+    func setInterestedTags(tags: [String]) throws {
+        try self.userDataSource.setInterestedTags(tags: tags)
+    }
+    
+    func addHeartToRecord(id: String) throws {
+        try self.userDataSource.addHeartToRecord(id: id)
+    }
+    
+    func deleteHeartFromRecord(id: String) throws {
+        try self.userDataSource.deleteHeartFromRecord(id: id)
+    }
+    
+    
 }

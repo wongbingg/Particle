@@ -8,6 +8,10 @@
 import RxSwift
 
 protocol UserDataSource {
-    func getMyProfile() -> Observable<UserReadDTO>
-    func setInterestedTags(tags: [String]) -> Observable<UserReadDTO>
+    func setMyProfile(dto: UserReadDTO) throws
+    func getMyProfile() throws -> UserReadDTO
+    func setInterestedTags(tags: [String]) throws
+    func getInterestedTags() throws -> [String]
+    func addHeartToRecord(id: String) throws
+    func deleteHeartFromRecord(id: String) throws
 }
