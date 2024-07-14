@@ -25,6 +25,13 @@ final class SetAlarmViewController: UIViewController, SetAlarmPresentable, SetAl
         static let alarmAt12Key = "점심시간에 한 번 더 보기"
         static let alarmAt19Key = "퇴근할 때 한 번 더 보기"
         static let alarmAt22Key = "자기전에 한 번 더 보기"
+        
+        static let alarmAt8Message = "즐거운 아침이에요!"
+        static let alarmAt12Message = "즐거운 점심이에요!"
+        static let alarmAt19Message = "보람찬 저녁이에요!"
+        static let alarmAt22Message = "오늘 하루도 고생하셨어요!"
+        static let commonLastMessage = " 캡쳐했던 중요한 글이 있다면 Particle에서 정리해보아요 ☺️"
+        static let commonTitleMessage = "Particle"
     }
     
     enum Metric {
@@ -191,8 +198,8 @@ final class SetAlarmViewController: UIViewController, SetAlarmPresentable, SetAl
                 if state {
                     LocalAlarmManager.scheduleDailyLocalNotification(
                         identifier: Strings.alarmAt8Key,
-                        title: "제목",
-                        body: "8출근할 때 한 번 더 보기",
+                        title: Strings.commonTitleMessage,
+                        body: Strings.alarmAt8Message + Strings.commonLastMessage,
                         hour: 8,
                         minute: 0)
                 } else {
@@ -207,8 +214,8 @@ final class SetAlarmViewController: UIViewController, SetAlarmPresentable, SetAl
                 if state {
                     LocalAlarmManager.scheduleDailyLocalNotification(
                         identifier: Strings.alarmAt12Key,
-                        title: "제목",
-                        body: "12점심시간에 한 번 더 보기",
+                        title: Strings.commonTitleMessage,
+                        body: Strings.alarmAt12Message + Strings.commonLastMessage,
                         hour: 12,
                         minute: 0)
                 } else {
@@ -223,8 +230,8 @@ final class SetAlarmViewController: UIViewController, SetAlarmPresentable, SetAl
                 if state {
                     LocalAlarmManager.scheduleDailyLocalNotification(
                         identifier: Strings.alarmAt19Key,
-                        title: "제목",
-                        body: "19퇴근할 때 한 번 더 보기",
+                        title: Strings.commonTitleMessage,
+                        body: Strings.alarmAt19Message + Strings.commonLastMessage,
                         hour: 19,
                         minute: 0)
                 } else {
@@ -239,8 +246,8 @@ final class SetAlarmViewController: UIViewController, SetAlarmPresentable, SetAl
                 if state {
                     LocalAlarmManager.scheduleDailyLocalNotification(
                         identifier: Strings.alarmAt22Key,
-                        title: "제목",
-                        body: "22자기전에 한 번 더 보기",
+                        title: Strings.commonTitleMessage,
+                        body: Strings.alarmAt22Message + Strings.commonLastMessage,
                         hour: 22,
                         minute: 0)
                 } else {

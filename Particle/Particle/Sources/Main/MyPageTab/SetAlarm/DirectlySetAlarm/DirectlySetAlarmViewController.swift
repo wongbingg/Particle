@@ -22,6 +22,9 @@ final class DirectlySetAlarmViewController: UIViewController,
     
     enum Strings {
         static let alarmKey = "직접알림"
+        
+        static let alarmTitleMessage = "Particle"
+        static let alarmMessage = "기록하지 않는 건 기억되지 않아요. 캡처해둔 중요한 글이 있다면 Particle에서 정리해보아요 ☺️"
     }
     
     enum Metric {
@@ -201,8 +204,8 @@ final class DirectlySetAlarmViewController: UIViewController,
                     UserDefaults.standard.setValue("\(hhmm.0):\(hhmm.1)", forKey: Strings.alarmKey)
                     LocalAlarmManager.scheduleDailyLocalNotification(
                         identifier: Strings.alarmKey,
-                        title: "직접",
-                        body: "설정한 알림",
+                        title: Strings.alarmTitleMessage,
+                        body: Strings.alarmMessage,
                         hour: hhmm.0,
                         minute: hhmm.1)
                     showRegisterSuccessAlert()
