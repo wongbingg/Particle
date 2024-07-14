@@ -272,7 +272,7 @@ final class RecordDetailViewController: UIViewController,
 
     init(data: RecordReadDTO, editable: Bool = true) {
 		self.data.accept(data)
-        self.isMyRecord = data.createdBy == UserDefaults.standard.string(forKey: "USER_NAME")
+        self.isMyRecord = data.createdBy == UserSingleton.shared.info?.nickname ?? "사용자"
         self.editable = editable
         super.init(nibName: nil, bundle: nil)
         view.backgroundColor = .particleColor.black

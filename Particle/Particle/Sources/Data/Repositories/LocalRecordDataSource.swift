@@ -138,7 +138,7 @@ extension LocalRecordDataSource: RecordDataSource {
             cdrecord.title = record.title
             cdrecord.url = record.url
             cdrecord.createdAt = DateManager.shared.todayString()
-            cdrecord.createdBy = UserDefaults.standard.string(forKey: "USER_NAME") // 오프라인 상태일 때
+            cdrecord.createdBy = UserSingleton.shared.info?.nickname ?? "사용자"
             cdrecord.attribute = "\(colors.randomElement() ?? "BLUE")&\(record.style)"
             cdrecord.tags = record.tags.joined(separator: "&") // 모든 태그를 &로 이어주기
             cdrecord.items = record.items.map { $0.encodeForCoreData() }.joined(separator: "&")
