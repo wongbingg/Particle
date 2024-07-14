@@ -27,14 +27,17 @@ final class LoggedOutInteractor: PresentableInteractor<LoggedOutPresentable>,
     weak var router: LoggedOutRouting?
     weak var listener: LoggedOutListener?
     
-    private let loginUseCase: LoginUseCase
+    private let fetchMyProfileUseCase: FetchMyProfileUseCase
+    private let setMyProfileUseCase: SetMyProfileUseCase
     private let disposeBag = DisposeBag()
     
     init(
         presenter: LoggedOutPresentable,
-        loginUseCase: LoginUseCase
+        fetchMyProfileUseCase: FetchMyProfileUseCase,
+        setMyProfileUseCase: SetMyProfileUseCase
     ) {
-        self.loginUseCase = loginUseCase
+        self.fetchMyProfileUseCase = fetchMyProfileUseCase
+        self.setMyProfileUseCase = setMyProfileUseCase
         super.init(presenter: presenter)
         presenter.listener = self
     }
@@ -49,30 +52,28 @@ final class LoggedOutInteractor: PresentableInteractor<LoggedOutPresentable>,
     
     // MARK: - LoggedOutPresentableListener
     
-    func successLogin(with provider: String, identifier: String) {
-        let request = LoginRequest(provider: provider, identifier: identifier)
-        
-        loginUseCase.execute(with: request)
-            .observeOn(MainScheduler.instance)
-            .subscribe { [weak self] isFirstLogin in
-                if isFirstLogin {
-                    self?.router?.routeToSelectTag()
-                } else {
-                    self?.listener?.login()
-                }
-            } onError: { error in
-                Console.error(error.localizedDescription)
-            }
-            .disposed(by: disposeBag)
+    func successLogin_Serverless() {
+        do {
+            _ = try fetchMyProfileUseCase.execute()
+            listener?.login()
+        } catch {
+            setMyProfile()
+        }
     }
     
-    func successLogin_Serverless() {
-        if UserDefaults.standard.bool(forKey: "FIRST_LOGIN_EVENT") {
-            listener?.login()
-        } else {
-            UserDefaults.standard.set(true, forKey: "FIRST_LOGIN_EVENT")
-            UserDefaults.standard.set("사용자", forKey: "USER_NAME")
+    private func setMyProfile() {
+        do {
+            let dto = UserReadDTO(
+                id: "id",
+                nickname: "사용자",
+                profileImageUrl: "",
+                interestedTags: [],
+                interestedRecords: []
+            )
+            try setMyProfileUseCase.execute(dto: dto)
             router?.routeToSelectTag()
+        } catch {
+            Console.error(error.localizedDescription)
         }
     }
     

@@ -14,7 +14,6 @@ import AuthenticationServices
 import UIKit
 
 protocol LoggedOutPresentableListener: AnyObject {
-    func successLogin(with provider: String, identifier: String)
     func successLogin_Serverless()
 }
 
@@ -147,18 +146,6 @@ final class LoggedOutViewController: UIViewController, LoggedOutPresentable, Log
     }
     
     private func configureButton() {
-        let kakaoLoginButtonTapGesture = UITapGestureRecognizer(
-            target: self,
-            action: #selector(kakaoLoginButtonTapped)
-        )
-        
-        kakaoLoginButton.addGestureRecognizer(kakaoLoginButtonTapGesture)
-        
-        let appleLoginButtonTapGesture = UITapGestureRecognizer(
-            target: self,
-            action: #selector(appleLoginButtonTapped)
-        )
-        appleLoginButton.addGestureRecognizer(appleLoginButtonTapGesture)
         
         let normalLoginButtonTapGesture = UITapGestureRecognizer(
             target: self,
@@ -169,71 +156,10 @@ final class LoggedOutViewController: UIViewController, LoggedOutPresentable, Log
     }
     
     @objc
-    private func appleLoginButtonTapped() {
-        let appleIDProvider = ASAuthorizationAppleIDProvider()
-        let request = appleIDProvider.createRequest()
-        request.requestedScopes = [.fullName, .email]
-        
-        let authorizationController = ASAuthorizationController(authorizationRequests: [request])
-        authorizationController.delegate = self
-        authorizationController.presentationContextProvider = self
-        authorizationController.performRequests()
-    }
-    
-    @objc
-    private func kakaoLoginButtonTapped() {
-
-        if (UserApi.isKakaoTalkLoginAvailable()) {
-            loginWithKakaoTalkApp()
-        } else {
-            Console.error("카카오톡이 설치되어있지 않습니다.")
-            loginWithKakaoAccount()
-        }
-    }
-    
-    @objc
     private func normalLoginButtonTapped() {
         // TODO: 로그인 했다고 치고 홈화면으로 이동
         listener?.successLogin_Serverless()
         
-    }
-    
-    private func loginWithKakaoTalkApp() {
-        
-        UserApi.shared.loginWithKakaoTalk { [weak self] (oauthToken, error) in
-            if let error = error {
-                Console.error(error.localizedDescription)
-            } else {
-                Console.log("\(#function) success")
-                
-                UserApi.shared.me { (user, error) in
-                    guard let identifier = user?.id else {
-                        Console.error("kakaoLogin user.id 가 존재하지 않습니다.")
-                        return
-                    }
-                    self?.listener?.successLogin(with: "kakao", identifier: "\(identifier)")
-                }
-            }
-        }
-    }
-    
-    private func loginWithKakaoAccount() {
-
-        UserApi.shared.loginWithKakaoAccount { [weak self] (oauthToken, error) in
-            if let error = error {
-                Console.error(error.localizedDescription)
-            } else {
-                Console.log("\(#function) success.")
-
-                UserApi.shared.me { (user, error) in /// weak self?
-                    guard let identifier = user?.id else {
-                        Console.error("kakaoLogin user.id 가 존재하지 않습니다.")
-                        return
-                    }
-                    self?.listener?.successLogin(with: "kakao", identifier: "\(identifier)")
-                }
-            }
-        }
     }
     
     private func generateAlertButton(title: String, _ buttonAction: @escaping () -> Void) -> UIButton {
@@ -253,44 +179,6 @@ final class LoggedOutViewController: UIViewController, LoggedOutPresentable, Log
     }
 }
 
-// MARK: - Apple Login
-
-extension LoggedOutViewController: ASAuthorizationControllerDelegate,
-                                   ASAuthorizationControllerPresentationContextProviding  {
-    
-    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        return .init(frame: .init(x: 0, y: 0, width: 300, height: 300)) // FIXME: ??
-    }
-    
-    func authorizationController(controller: ASAuthorizationController,
-                                 didCompleteWithAuthorization authorization: ASAuthorization) {
-        switch authorization.credential {
-            
-        case let appleIDCredential as ASAuthorizationAppleIDCredential:
-            let userIdentifier = appleIDCredential.user
-            let _ = appleIDCredential.fullName
-            let _ = appleIDCredential.email
-            Console.log("\(#function) success")
-            listener?.successLogin(with: "apple", identifier: "\(userIdentifier)")
-            
-        case let passwordCredential as ASPasswordCredential:
-            let username = passwordCredential.user
-            let _ = passwordCredential.password
-            Console.log("\(#function) success")
-            listener?.successLogin(with: "apple", identifier: "\(username)")
-            
-        default:
-            break
-        }
-    }
-    
-    func authorizationController(controller: ASAuthorizationController,
-                                 didCompleteWithError error: Error) {
-        // TODO: Handle Error
-        Console.error(error.localizedDescription)
-    }
-}
-
 // MARK: - Layout Settting
 
 private extension LoggedOutViewController {
@@ -304,10 +192,9 @@ private extension LoggedOutViewController {
             titleStackView.addArrangedSubview($0)
         }
         
-        [/*kakaoLoginButton, appleLoginButton, */normalLoginButton].forEach {
+        [normalLoginButton].forEach {
             buttonStackView.addArrangedSubview($0)
         }
-//        buttonStackView.addArrangedSubview(normalLoginButton)
     }
     
     func setConstraints() {
