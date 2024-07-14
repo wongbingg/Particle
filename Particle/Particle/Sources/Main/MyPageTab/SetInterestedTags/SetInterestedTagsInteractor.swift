@@ -22,7 +22,6 @@ protocol SetInterestedTagsPresentable: Presentable {
 
 protocol SetInterestedTagsListener: AnyObject {
     func setInterestedTagsBackButtonTapped()
-//    func setInterestedTagsOKButtonTapped()
 }
 
 final class SetInterestedTagsInteractor: PresentableInteractor<SetInterestedTagsPresentable>,
@@ -60,23 +59,11 @@ final class SetInterestedTagsInteractor: PresentableInteractor<SetInterestedTags
     }
     
     func setInterestedTagsOKButtonTapped(with tags: [String]) {
-
-        setInterestedTagsUseCase.execute(tags: tags)
-            .observeOn(MainScheduler.instance)
-            .subscribe { [weak self] dto in
-                self?.presenter.showUploadSuccessAlert()
-            } onError: { [weak self] error in
-                if case DataTransferError.resolvedNetworkFailure(let errorResponse as ErrorResponse) = error {
-                    self?.presenter.showErrorAlert(description: errorResponse.toDomain())
-                } else {
-                    self?.presenter.showErrorAlert(description: "알 수 없는 에러가 발생했습니다.\n다시 시도해주세요.\ndescription: \(error.localizedDescription)")
-                }
-            }
-            .disposed(by: disposeBag)
-    }
-    
-    func setInterestedTagsOKButtonTapped_Serverless(with tags: [String]) {
-        UserDefaults.standard.set(tags.map { "#\($0)" }, forKey: "INTERESTED_TAGS") // # 붙이는게 맞나 ?
-        presenter.showUploadSuccessAlert()
+        do {
+            try setInterestedTagsUseCase.execute(tags: tags)
+            self.presenter.showUploadSuccessAlert()
+        } catch {
+            self.presenter.showErrorAlert(description: "\(error.localizedDescription)")
+        }
     }
 }

@@ -14,7 +14,6 @@ import SnapKit
 protocol SetInterestedTagsPresentableListener: AnyObject {
     func setInterestedTagsBackButtonTapped()
     func setInterestedTagsOKButtonTapped(with tags: [String])
-    func setInterestedTagsOKButtonTapped_Serverless(with tags: [String])
 }
 
 final class SetInterestedTagsViewController: UIViewController,
@@ -231,7 +230,7 @@ final class SetInterestedTagsViewController: UIViewController,
         .disposed(by: disposeBag)
         
         okButton.rx.tap.bind { [weak self] _ in
-            self?.listener?.setInterestedTagsOKButtonTapped_Serverless(
+            self?.listener?.setInterestedTagsOKButtonTapped(
                 with: self?.selectedTags.value
                     .flatMap { $0 }
                     .map { Tag.init(rawValue: $0)?.value ?? "UXUI" } ?? []
