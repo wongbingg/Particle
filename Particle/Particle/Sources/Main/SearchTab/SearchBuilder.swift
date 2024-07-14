@@ -47,7 +47,7 @@ final class SearchBuilder: Builder<SearchDependency>, SearchBuildable {
         let interactor = SearchInteractor(
             presenter: viewController,
             searchUseCase: component.searchUseCase,
-            userInterestedTagsUseCase: component.userInterestedTagsUseCase, 
+            fetchUserInterestedTagsUseCase: component.userInterestedTagsUseCase, 
             fetchRecentSearchTextsUseCase: component.fetchRecentSearchTextsUseCase
         )
         interactor.listener = listener
@@ -65,6 +65,10 @@ final class SearchBuilder: Builder<SearchDependency>, SearchBuildable {
 }
 
 extension SearchComponent: MyRecordListDependency, RecordDetailDependency {
+    var userRepository: UserRepository {
+        return dependency.userRepository
+    }
+    
     var recordRepository: RecordRepository {
         return dependency.recordRepository
     }

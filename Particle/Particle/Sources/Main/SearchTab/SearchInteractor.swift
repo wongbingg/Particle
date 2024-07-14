@@ -38,17 +38,17 @@ final class SearchInteractor: PresentableInteractor<SearchPresentable>, SearchIn
     private var disposeBag = DisposeBag()
     
     private let searchUseCase: SearchUseCase
-    private let userInterestedTagsUseCase: FetchUserInterestTagsUseCase
+    private let fetchUserInterestedTagsUseCase: FetchUserInterestTagsUseCase
     private let fetchRecentSearchTextsUseCase: FetchRecentSearchTextsUseCase
     
     init(
         presenter: SearchPresentable,
         searchUseCase: SearchUseCase,
-        userInterestedTagsUseCase: FetchUserInterestTagsUseCase,
+        fetchUserInterestedTagsUseCase: FetchUserInterestTagsUseCase,
         fetchRecentSearchTextsUseCase: FetchRecentSearchTextsUseCase
     ) {
         self.searchUseCase = searchUseCase
-        self.userInterestedTagsUseCase = userInterestedTagsUseCase
+        self.fetchUserInterestedTagsUseCase = fetchUserInterestedTagsUseCase
         self.fetchRecentSearchTextsUseCase = fetchRecentSearchTextsUseCase
         super.init(presenter: presenter)
         presenter.listener = self
@@ -71,11 +71,11 @@ final class SearchInteractor: PresentableInteractor<SearchPresentable>, SearchIn
             }
             .disposed(by: disposeBag)
         
-        userInterestedTagsUseCase.execute()
-            .bind { [weak self] result in
-                self?.presenter.fetchUserInterestTags(result)
-            }
-            .disposed(by: disposeBag)
+//        fetchUserInterestedTagsUseCase.execute()
+//            .bind { [weak self] result in
+//                self?.presenter.fetchUserInterestTags(result)
+//            }
+//            .disposed(by: disposeBag)
     }
 
     override func willResignActive() {
