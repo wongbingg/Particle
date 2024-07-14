@@ -21,7 +21,7 @@ extension UIView {
         layer.mask = maskLayer
     }
     
-    func showToast(message: String, duration: Double = 3.0) {
+    func showToast(message: String, duration: Double = 1.0) {
         let toastLabel = UILabel()
         toastLabel.text = message
         toastLabel.textColor = .white

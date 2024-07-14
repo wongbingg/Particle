@@ -32,22 +32,26 @@ protocol RecordDetailListener: AnyObject {
 final class RecordDetailInteractor: PresentableInteractor<RecordDetailPresentable>,
                                     RecordDetailInteractable,
                                     RecordDetailPresentableListener {
-        
+     
     weak var router: RecordDetailRouting?
     weak var listener: RecordDetailListener?
     
     private var disposeBag = DisposeBag()
     private let recordData: RecordReadDTO
     private let deleteRecordUseCase: DeleteRecordUseCase
+    private let addHeartToRecordUseCase: AddHeartToRecordUseCase
+    private let deleteHeartFromRecordUseCase: DeleteHeartFromRecordUseCase
     
     init(
         presenter: RecordDetailPresentable,
         deleteRecordUseCase: DeleteRecordUseCase,
-//        reportRecordUseCase: ReportRecordUseCase,
+        addHeartToRecordUseCase: AddHeartToRecordUseCase,
+        deleteHeartFromRecordUseCase: DeleteHeartFromRecordUseCase,
         data: RecordReadDTO
     ) {
         self.deleteRecordUseCase = deleteRecordUseCase
-//        self.reportRecordUseCase = reportRecordUseCase
+        self.addHeartToRecordUseCase = addHeartToRecordUseCase
+        self.deleteHeartFromRecordUseCase = deleteHeartFromRecordUseCase
         self.recordData = data
         super.init(presenter: presenter)
         presenter.listener = self
@@ -111,6 +115,16 @@ final class RecordDetailInteractor: PresentableInteractor<RecordDetailPresentabl
     
     func recordDetailEditButtonTapped(with id: String) {
         router?.attachOrganizingSentence()
+    }
+    
+    func recordDetailHeartButtonTapped(with id: String, isHeart: Bool) {
+        do {
+            isHeart ?
+            try addHeartToRecordUseCase.execute(id: id) :
+            try deleteHeartFromRecordUseCase.execute(id: id)
+        } catch {
+            Console.error(error.localizedDescription)
+        }
     }
     
     // MARK: - OrganizingSentenceListener

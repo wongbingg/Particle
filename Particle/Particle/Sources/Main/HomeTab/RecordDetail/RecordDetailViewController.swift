@@ -16,6 +16,7 @@ protocol RecordDetailPresentableListener: AnyObject {
     func recordDetailReportButtonTapped(with id: String)
     func recordDetailSaveButtonTapped(with id: String)
     func recordDetailEditButtonTapped(with id: String)
+    func recordDetailHeartButtonTapped(with id: String, isHeart: Bool)
 }
 
 final class RecordDetailViewController: UIViewController,
@@ -70,7 +71,7 @@ final class RecordDetailViewController: UIViewController,
         
         enum HeartButton {
             static let topOffset: CGFloat = 27
-            static let size: CGFloat = 20
+            static let size: CGFloat = 25
         }
         
         enum ParticleAlert {
@@ -347,6 +348,7 @@ final class RecordDetailViewController: UIViewController,
             .bind { [weak self] bool in
                 guard let self = self else { return }
                 heartButton.setImage(UIImage(named: bool ? "heartFull" : "heart"), for: .normal)
+                self.listener?.recordDetailHeartButtonTapped(with: data.value.id, isHeart: bool)
                 bool ? view.showToast(message: "좋아요가 등록되었어요 !") : view.showToast(message: "좋아요가 취소되었어요.")
             }
             .disposed(by: disposeBag)
