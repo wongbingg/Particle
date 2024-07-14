@@ -9,17 +9,23 @@ import RIBs
 import Alamofire
 
 protocol LoggedOutDependency: Dependency {
-    var loginUseCase: LoginUseCase { get }
     var setInterestedTagsUseCase: SetInterestedTagsUseCase { get }
+    var fetchMyProfileUseCase: FetchMyProfileUseCase { get }
+    var setMyProfileUseCase: SetMyProfileUseCase { get }
 }
 
 final class LoggedOutComponent: Component<LoggedOutDependency>, SelectTagDependency {
-    fileprivate var loginUseCase: LoginUseCase {
-        return dependency.loginUseCase
-    }
     
     var setInterestedTagsUseCase: SetInterestedTagsUseCase {
         return dependency.setInterestedTagsUseCase
+    }
+    
+    var fetchMyProfileUseCase: FetchMyProfileUseCase {
+        return dependency.fetchMyProfileUseCase
+    }
+    
+    var setMyProfileUseCase: SetMyProfileUseCase {
+        return dependency.setMyProfileUseCase
     }
 }
 
@@ -40,7 +46,8 @@ final class LoggedOutBuilder: Builder<LoggedOutDependency>, LoggedOutBuildable {
         let viewController = LoggedOutViewController()
         let interactor = LoggedOutInteractor(
             presenter: viewController,
-            loginUseCase: component.loginUseCase
+            fetchMyProfileUseCase: component.fetchMyProfileUseCase,
+            setMyProfileUseCase: component.setMyProfileUseCase
         )
         interactor.listener = listener
         

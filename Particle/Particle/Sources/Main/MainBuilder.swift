@@ -76,7 +76,7 @@ final class MainBuilder: Builder<MainDependency>, MainBuildable {
         let recordDataSource = LocalRecordDataSource(coreData: .shared) // coreData로 데이터소스 변경
         let recordRepository = DefaultRecordRepository(recordDataSource: recordDataSource, recordMapper: RecordMapper())
         
-        let userDataSource = DefaultUserDataSource(dataTransferService: apiDataTransferService)
+        let userDataSource = LocalUserDataSource(coreData: .shared) // coreData로 데이터소스 변경
         let userRepository = DefaultUserRepository(userDataSource: userDataSource)
         
         let searchDataSource = DefaultSearchDataSource(dataTransferService: apiDataTransferService)

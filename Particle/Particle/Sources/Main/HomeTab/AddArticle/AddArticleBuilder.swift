@@ -10,6 +10,7 @@ import RIBs
 protocol AddArticleDependency: Dependency {
     var addArticleViewController: ViewControllable { get }
     var recordRepository: RecordRepository { get }
+    var userRepository: UserRepository { get }
 }
 
 final class AddArticleComponent: Component<AddArticleDependency> {
@@ -67,6 +68,10 @@ extension AddArticleComponent: PhotoPickerDependency,
                                OrganizingSentenceDependency,
                                SetAdditionalInformationDependency,
                                RecordDetailDependency {
+    var userRepository: UserRepository {
+        return dependency.userRepository
+    }
+    
     var photoRepository: PhotoRepository {
         return defaultPhotoRepository
     }

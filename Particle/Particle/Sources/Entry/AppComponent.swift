@@ -8,7 +8,7 @@
 import RIBs
 
 class AppComponent: Component<EmptyComponent>, RootDependency {
-    var authService: AuthService
+//    var authService: AuthService
     var userRepository: UserRepository
     
     init() {
@@ -22,9 +22,10 @@ class AppComponent: Component<EmptyComponent>, RootDependency {
         let networkService = DefaultNetworkService(config: config)
         let dataTransferService = DefaultDataTransferService(with: networkService)
         
-        self.authService = DefaultAuthService(dataTransferService: dataTransferService)
+//        self.authService = DefaultAuthService(dataTransferService: dataTransferService)
         
-        let userDataSource = DefaultUserDataSource(dataTransferService: dataTransferService)
+//        let userDataSource = DefaultUserDataSource(dataTransferService: dataTransferService)
+        let userDataSource = LocalUserDataSource(coreData: .shared)
         self.userRepository = DefaultUserRepository(userDataSource: userDataSource)
         
         super.init(dependency: EmptyComponent())

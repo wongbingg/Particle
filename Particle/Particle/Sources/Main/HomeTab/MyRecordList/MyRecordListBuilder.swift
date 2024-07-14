@@ -9,6 +9,7 @@ import RIBs
 
 protocol MyRecordListDependency: Dependency {
     var recordRepository: RecordRepository { get }
+    var userRepository: UserRepository { get }
 }
 
 final class MyRecordListComponent: Component<MyRecordListDependency> {
@@ -57,6 +58,10 @@ final class MyRecordListBuilder: Builder<MyRecordListDependency>, MyRecordListBu
 }
 
 extension MyRecordListComponent: RecordDetailDependency {
+    var userRepository: UserRepository {
+        return dependency.userRepository
+    }
+    
     var recordRepository: RecordRepository {
         return dependency.recordRepository
     }

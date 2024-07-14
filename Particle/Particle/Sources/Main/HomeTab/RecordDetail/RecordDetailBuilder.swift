@@ -9,6 +9,7 @@ import RIBs
 
 protocol RecordDetailDependency: Dependency {
     var recordRepository: RecordRepository { get }
+    var userRepository: UserRepository { get }
 }
 
 final class RecordDetailComponent: Component<RecordDetailDependency>,
@@ -20,8 +21,18 @@ final class RecordDetailComponent: Component<RecordDetailDependency>,
         return dependency.recordRepository
     }
     
+    var userRepository: UserRepository {
+        return dependency.userRepository
+    }
+    
     fileprivate var deleteRecordUseCase: DeleteRecordUseCase {
         return DefaultDeleteRecordUseCase(recordRepository: dependency.recordRepository)
+    }
+    var addHeartToRecordUseCase: AddHeartToRecordUseCase {
+        return DefaultAddHeartToRecordUseCase(userRepository: dependency.userRepository)
+    }
+    var deleteHeartFromRecordUseCase: DeleteHeartFromRecordUseCase {
+        return DefaultDeleteHeartFromRecordUseCase(userRepository: dependency.userRepository)
     }
 }
 
@@ -49,7 +60,8 @@ final class RecordDetailBuilder: Builder<RecordDetailDependency>, RecordDetailBu
         let interactor = RecordDetailInteractor(
             presenter: viewController,
             deleteRecordUseCase: component.deleteRecordUseCase,
-//            reportRecordUseCase: component.reportRecordUseCase,
+            addHeartToRecordUseCase: component.addHeartToRecordUseCase,
+            deleteHeartFromRecordUseCase: component.deleteHeartFromRecordUseCase,
             data: data
         )
         interactor.listener = listener

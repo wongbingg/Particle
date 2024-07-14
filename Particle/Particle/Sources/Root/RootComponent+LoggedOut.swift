@@ -12,9 +12,12 @@ protocol RootDependencyLoggedOut: Dependency {
 }
 
 extension RootComponent: LoggedOutDependency {
+    var fetchMyProfileUseCase: FetchMyProfileUseCase {
+        return DefaultFetchMyProfileUseCase(userRepository: dependency.userRepository)
+    }
     
-    var loginUseCase: LoginUseCase {
-        return DefaultLoginUseCase(authService: dependency.authService)
+    var setMyProfileUseCase: SetMyProfileUseCase {
+        return DefaultSetMyProfileUseCase(userRepository: dependency.userRepository)
     }
     
     var setInterestedTagsUseCase: SetInterestedTagsUseCase {

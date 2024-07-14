@@ -8,7 +8,7 @@
 import RIBs
 
 protocol RootDependency: Dependency {
-    var authService: AuthService { get }
+//    var authService: AuthService { get }
     var userRepository: UserRepository { get }
 }
 
