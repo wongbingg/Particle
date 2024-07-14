@@ -52,26 +52,13 @@ final class SelectTagInteractor: PresentableInteractor<SelectTagPresentable>,
         // TODO: LoggedOut RIB로 돌아가기?
     }
     
-    func startButtonTapped(with selectedTags: [String]) {
-
-        setInterestedTagsUseCase.execute(tags: selectedTags)
-            .observeOn(MainScheduler.instance)
-            .subscribe { [weak self] isComplete in
-                if isComplete {
-                    self?.listener?.selectTagSuccess()
-                }
-            } onError: { [weak self] error in
-                if case DataTransferError.resolvedNetworkFailure(let errorResponse as ErrorResponse) = error {
-                    self?.presenter.showErrorAlert(description: errorResponse.toDomain())
-                } else {
-                    self?.presenter.showErrorAlert(description: error.localizedDescription)
-                }
-            }
-            .disposed(by: disposeBag)
-    }
-    
     func startButtonTapped_Serverless(with selectedTags: [String]) {
-        UserDefaults.standard.set(selectedTags.map { "#\($0)" }, forKey: "INTERESTED_TAGS")
-        listener?.selectTagSuccess()
+        do {
+            try setInterestedTagsUseCase.execute(tags: selectedTags)
+            listener?.selectTagSuccess()
+        } catch {
+            self.presenter.showErrorAlert(description: "\(error.localizedDescription)")
+            // FIXME: 화면쪽으로 에러 얼럿 띄우도록 수정
+        }
     }
 }

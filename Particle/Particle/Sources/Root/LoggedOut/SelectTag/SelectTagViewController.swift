@@ -13,7 +13,6 @@ import SnapKit
 
 protocol SelectTagPresentableListener: AnyObject {
     func backButtonTapped()
-    func startButtonTapped(with selectedTags: [String])
     func startButtonTapped_Serverless(with selectedTags: [String])
 }
 
