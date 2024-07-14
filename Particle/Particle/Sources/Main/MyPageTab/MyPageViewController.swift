@@ -16,6 +16,7 @@ protocol MyPagePresentableListener: AnyObject {
     func setAccountButtonTapped()
     func setAlarmButtonTapped()
     func setInterestedTagsButtonTapped()
+    func showMyArticleButtonTapped()
 }
 
 final class MyPageViewController: UIViewController, MyPagePresentable, MyPageViewControllable {
@@ -63,7 +64,7 @@ final class MyPageViewController: UIViewController, MyPagePresentable, MyPageVie
         let label = UILabel()
         label.font = .particleFont.generate(style: .pretendard_SemiBold, size: 16)
         label.textColor = .particleColor.white
-        label.text = "내가 저장한 아티클"
+        label.text = "내가 좋아한 아티클"
 
         let icon = UIImageView()
         icon.image = .particleImage.arrowRight
@@ -223,6 +224,7 @@ final class MyPageViewController: UIViewController, MyPagePresentable, MyPageVie
     
     @objc private func showMyArticleButtonTapped(){
         Console.debug("\(#function)")
+        listener?.showMyArticleButtonTapped()
     }
     
 }

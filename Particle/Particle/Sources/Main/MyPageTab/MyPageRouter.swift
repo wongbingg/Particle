@@ -10,7 +10,8 @@ import RIBs
 protocol MyPageInteractable: Interactable,
                              SetAccountListener,
                              SetAlarmListener,
-                             SetInterestedTagsListener {
+                             SetInterestedTagsListener,
+                             MyRecordListListener {
     
     var router: MyPageRouting? { get set }
     var listener: MyPageListener? { get set }
@@ -28,11 +29,13 @@ final class MyPageRouter: ViewableRouter<MyPageInteractable, MyPageViewControlla
         viewController: MyPageViewControllable,
         setAccountBuildable: SetAccountBuildable,
         setAlarmBuildable: SetAlarmBuildable,
-        setInterestedTagsBuildable: SetInterestedTagsBuildable
+        setInterestedTagsBuildable: SetInterestedTagsBuildable,
+        myRecordListBuildable: MyRecordListBuildable
     ) {
         self.setAccountBuildable = setAccountBuildable
         self.setAlarmBuildable = setAlarmBuildable
         self.setInterestedTagsBuildable = setInterestedTagsBuildable
+        self.myRecordListBuildable = myRecordListBuildable
         super.init(interactor: interactor,viewController: viewController)
         interactor.router = self
     }
@@ -99,6 +102,26 @@ final class MyPageRouter: ViewableRouter<MyPageInteractable, MyPageViewControlla
         }
     }
     
+    // MARK: - MyRecordList RIB
+    
+    func attachMyRecordList() {
+        if myRecordListRouting != nil {
+            return
+        }
+        let router = myRecordListBuildable.build(withListener: interactor, tag: "Heart")
+        viewController.pushViewController(router.viewControllable, animated: true)
+        attachChild(router)
+        myRecordListRouting = router
+    }
+    
+    func detachMyRecordList() {
+        if let myRecordList = myRecordListRouting {
+            viewController.popViewController(animated: true)
+            detachChild(myRecordList)
+            myRecordListRouting = nil
+        }
+    }
+    
     // MARK: - Private
     
     private let setAccountBuildable: SetAccountBuildable
@@ -109,4 +132,7 @@ final class MyPageRouter: ViewableRouter<MyPageInteractable, MyPageViewControlla
     
     private let setInterestedTagsBuildable: SetInterestedTagsBuildable
     private var setInterestedTagsRouting: SetInterestedTagsRouting?
+    
+    private let myRecordListBuildable: MyRecordListBuildable
+    private var myRecordListRouting: MyRecordListRouting?
 }

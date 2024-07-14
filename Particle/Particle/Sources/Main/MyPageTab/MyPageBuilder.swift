@@ -8,6 +8,7 @@
 import RIBs
 
 protocol MyPageDependency: Dependency {
+    var recordRepository: RecordRepository { get }
     var userRepository: UserRepository { get }
     var authService: AuthService { get }
 }
@@ -15,7 +16,12 @@ protocol MyPageDependency: Dependency {
 final class MyPageComponent: Component<MyPageDependency>,
                              SetAccountDependency,
                              SetAlarmDependency,
-                             SetInterestedTagsDependency {
+                             SetInterestedTagsDependency,
+                             MyRecordListDependency {
+    
+    var recordRepository: RecordRepository {
+        return dependency.recordRepository
+    }
     
     var userRepository: UserRepository {
         return dependency.userRepository
@@ -54,13 +60,15 @@ final class MyPageBuilder: Builder<MyPageDependency>, MyPageBuildable {
         let setAccountBuildable = SetAccountBuilder(dependency: component)
         let setAlarmBuildable = SetAlarmBuilder(dependency: component)
         let setInterestedTagsBuildable = SetInterestedTagsBuilder(dependency: component)
+        let myRecordListBuildable = MyRecordListBuilder(dependency: component)
         
         return MyPageRouter(
             interactor: interactor,
             viewController: viewController,
             setAccountBuildable: setAccountBuildable,
             setAlarmBuildable: setAlarmBuildable,
-            setInterestedTagsBuildable: setInterestedTagsBuildable
+            setInterestedTagsBuildable: setInterestedTagsBuildable,
+            myRecordListBuildable: myRecordListBuildable
         )
     }
 }

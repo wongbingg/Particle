@@ -17,6 +17,9 @@ protocol MyPageRouting: ViewableRouting {
     
     func attachSetInterestedTags()
     func detachSetInterestedTags()
+    
+    func attachMyRecordList()
+    func detachMyRecordList()
 }
 
 protocol MyPagePresentable: Presentable {
@@ -80,6 +83,10 @@ final class MyPageInteractor: PresentableInteractor<MyPagePresentable>,
         router?.attachSetInterestedTags()
     }
     
+    func showMyArticleButtonTapped() {
+        router?.attachMyRecordList()
+    }
+    
     // MARK: - MyPageInteractable
     
     func setAccountBackButtonTapped() {
@@ -98,9 +105,7 @@ final class MyPageInteractor: PresentableInteractor<MyPagePresentable>,
         listener?.myPageLogout()
     }
     
-//    func setInterestedTagsOKButtonTapped() {
-//        router?.detachSetInterestedTags()
-//    }
-    
-
+    func myRecordListBackButtonTapped() {
+        router?.detachMyRecordList()
+    }
 }

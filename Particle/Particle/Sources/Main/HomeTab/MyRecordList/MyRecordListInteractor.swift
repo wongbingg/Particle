@@ -66,6 +66,8 @@ final class MyRecordListInteractor: PresentableInteractor<MyRecordListPresentabl
         
         if tag == "My" {
             fetchAllRecords()
+        } else if tag == "Heart" {
+            fetchFavoriteRecords()
         } else {
             fetchRecordsFromTag()
         }
@@ -79,6 +81,31 @@ final class MyRecordListInteractor: PresentableInteractor<MyRecordListPresentabl
                 self.sortedByOldRecords = self.reverseRecords(data: result)
                 self.sortedByRecentRecords = result
                 self.presenter.setData(with: result)
+            } onError: { error in
+                Console.error(error.localizedDescription)
+            }
+            .disposed(by: disposeBag)
+    }
+    
+    private func fetchFavoriteRecords() {
+        
+        fetchMyRecordsByDateUseCase.execute()
+            .subscribe { [weak self] result in
+                guard let self = self else { return }
+                guard let interestedRecords = UserSingleton.shared.info?.interestedRecords else {
+                    return
+                }
+                var filteredResult = [SectionOfRecordDate]()
+                
+                for section in result {
+                    let interestedItems = section.items.filter {
+                        interestedRecords.contains($0.id)
+                    }
+                    filteredResult.append(.init(header: section.header, items: interestedItems))
+                }
+                self.sortedByOldRecords = self.reverseRecords(data: filteredResult)
+                self.sortedByRecentRecords = filteredResult
+                self.presenter.setData(with: filteredResult)
             } onError: { error in
                 Console.error(error.localizedDescription)
             }
