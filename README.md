@@ -5,8 +5,7 @@
 ![180](https://hackmd.io/_uploads/Bylt5yLWUp.png)
 
 
-앨범에 모아두었던 스크린샷에서 문장을 선택해 내용들을 하나의 글로 정리해 나만의 `파티클`을 만들 수 있는 앱 입니다.
-[앱스토어에서 다운받기](https://apps.apple.com/kr/app/particle/id6464103528)
+앨범에 모아두었던 스크린샷에서 문장을 선택해 내용들을 하나의 글로 정리해 나만의 `파티클`을 만들 수 있는 앱 입니다. [앱스토어에서 다운받기](https://apps.apple.com/kr/app/particle/id6464103528)
 <br>
 
 ## 📑 목차
@@ -70,7 +69,6 @@
 |메인화면|아티클 추가|태그별 아티클 조회|
 |:---:|:---:|:---:|
 |<img src="https://hackmd.io/_uploads/SyLeeMODR.gif" width="200">|<img src="https://hackmd.io/_uploads/B1TJGzuw0.gif" width="200">|<img src="https://hackmd.io/_uploads/HJCngzuP0.gif" width="200">|
-|`CollectionView`|`화면 상세설명`||
 
     
 <!-- ### 탐색 화면
@@ -89,7 +87,6 @@
 |마이페이지|알람설정|관심태그 설정|
 |:---:|:---:|:---:|
 |<img src="https://hackmd.io/_uploads/Bk1OzzdDA.png" width="200">|<img src="https://hackmd.io/_uploads/Hy_GGfuvR.png" width="200">|<img src="https://hackmd.io/_uploads/r10QMG_v0.png" width="200">|
-|`화면 상세설명`|`화면 상세설명`|`화면 상세설명`|
 
 <br>
 	
@@ -101,4 +98,16 @@
 
 ## 🛠️ 트러블 슈팅
 
-### ⚠️ 로컬 푸시알림 구현 
+### ⚠️ RIBs 구조 초기세팅
+- RIBs 를 나눌 단위에 대해 고민했습니다. 팀원과 논의 결과 Interactor가 MVVM 구조의 ViewModel 역할을 하는 것으로 파악하여 뷰 하나당 하나의 RIB 를 구성하기로 결정했습니다.
+- Viewless RIB 를 이용하여 여러 뷰를 하나의 흐름 단위로 묶어서 사용했습니다. 
+
+### ⚠️ 네트워킹 모듈 설계
+- Repository : 도메인 모델을 CRUD 하는 계층 입니다.
+    - DataSource : DTO 모델을 CRUD 하는 계층 입니다. 
+    - Mapper : DTO 모델 -> 도메인 모델로 변환해주는 객체입니다.
+
+### ⚠️ CoreData 버전추가
+- 좋아요 기능 추가를 위해서 CDUser Entity에 interestedRecords 프로퍼티를 추가했습니다.
+- 기존 Entity에 그대로 Attribute 만 추가하여 빌드하니 오류가 발생했습니다. 
+- 사용하는 모델파일 클릭 후 상단 Editor - Add Model Version 을 탭하여 새로운 버전을 추가하여 그 안에서 변경할 내용을 반영한 후 Inspector 창에 Model Version - Current 를 새로 추가한 버전으로 설정해주니 해결되었습니다. 
