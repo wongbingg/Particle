@@ -1,0 +1,28 @@
+{
+  "configurations" : [
+    {
+      "id" : "B04B904B-C85F-46E0-828F-ACD5E58B04FE",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:Particle.xcodeproj",
+      "identifier" : "AFB4BDC02A4093DC008BA9E0",
+      "name" : "Particle"
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:Particle.xcodeproj",
+        "identifier" : "AF2694712C522E2C00E19B12",
+        "name" : "ParticleTests"
+      }
+    }
+  ],
+  "version" : 1
+}
